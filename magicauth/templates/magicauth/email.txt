@@ -1,0 +1,7 @@
+Bonjour {{ user.first_name }} {{ user.last_name }},
+
+Pour accéder à {{ site.domain }}, vous avez juste à cliquer sur ce lien de connexion:  https://{{ site.domain }}{% url 'magicauth-validate-token' token.key %}
+
+Bonne journée,
+
+L'équipe de {{ site.domain }}

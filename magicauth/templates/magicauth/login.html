@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <link href="https://tabler.github.io/tabler/assets/css/dashboard.css" rel="stylesheet">
+</head>
+<body>
+  <div class="page">
+    <div class="main-page">
+      <div class="container">
+        <div class="my-3 my-md-5">
+          <div class="row row-cards">
+            <div class="col col-login col-6 mx-auto">
+              <form class="card" action="{% url 'magicauth-login' %}" method="post">
+                {% csrf_token %}
+
+                <div class="card-body p-4">
+                  {% if user.is_authenticated %}
+                    <div class="alert alert-info text-center" role="alert">
+                      Vous êtes déjà connecté
+                    </div>
+                    <div class="text-center">
+                      <a href="{% url LOGGED_IN_REDIRECT_URL_NAME %}" class="btn btn-success">Accédez à l'accueil</a>
+                      <a href="{% url LOGOUT_URL_NAME %}" class="btn btn-warning">Déconnectez-vous</a>
+                    </div>
+                  {% else %}
+                    {% if messages %}
+                      <div class="text-center" role="alert">
+                        {% for message in messages %}
+                          <p {% if message.tags %}class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</p>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                      <label class="text-uppercase form-label">Se connecter</label>
+                      <input type="email" name="email" class="form-control {% if form.errors %}state-invalid {% endif %}"
+                             id="id_email" aria-describedby="emailHelp" placeholder="Votre email" required/>
+                      {% for error in form.email.errors %}
+                        <div class="alet alert-danger text-center">{{ error }}</div>
+                      {% endfor %}
+                    </div>
+                    <div class="form-footer">
+                      <button type="submit" class="btn btn-primary btn-block">Valider</button>
+                    </div>
+                  {% endif %}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
