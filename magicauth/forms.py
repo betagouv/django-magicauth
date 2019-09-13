@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils.module_loading import import_string
@@ -17,7 +17,8 @@ class EmailForm(forms.Form):
     def clean_email(self):
         user_email = self.cleaned_data['email']
         user_email = user_email.lower()
-        if not User.objects.filter(username__iexact=user_email).exists():
+
+        if not get_user_model().objects.filter(username__iexact=user_email).exists():
             email_unknown_callback(user_email)
         return user_email
 
@@ -27,7 +28,8 @@ class EmailForm(forms.Form):
 
     def send_email(self, request):
         user_email = self.cleaned_data['email']
-        user = User.objects.get(username__iexact=user_email)
+        field_lookup = {f"username__iexact": user_email}
+        user = get_user_model().objects.get(**field_lookup)
         token = self.create_token(user)
         email_subject = magicauth_settings.EMAIL_SUBJECT
         html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
