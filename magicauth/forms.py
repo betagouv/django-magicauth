@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils.module_loading import import_string
-
 from magicauth import settings as magicauth_settings
 from magicauth.models import MagicToken
 
@@ -18,7 +17,9 @@ class EmailForm(forms.Form):
         user_email = self.cleaned_data['email']
         user_email = user_email.lower()
 
-        if not get_user_model().objects.filter(username__iexact=user_email).exists():
+        email_field = magicauth_settings.EMAIL_FIELD
+        field_lookup = {f"{email_field}__iexact": user_email}
+        if not get_user_model().objects.filter(**field_lookup).exists():
             email_unknown_callback(user_email)
         return user_email
 
@@ -28,7 +29,8 @@ class EmailForm(forms.Form):
 
     def send_email(self, request):
         user_email = self.cleaned_data['email']
-        field_lookup = {f"username__iexact": user_email}
+        email_field = magicauth_settings.EMAIL_FIELD
+        field_lookup = {f"{email_field}__iexact": user_email}
         user = get_user_model().objects.get(**field_lookup)
         token = self.create_token(user)
         email_subject = magicauth_settings.EMAIL_SUBJECT

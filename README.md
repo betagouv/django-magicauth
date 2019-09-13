@@ -14,13 +14,13 @@ Django Magicauth brings password-less authentication to your project.
 
 ## Quick start
 
-0. Install MagicAuth
+1. Install MagicAuth
 ```sh
 pip install git+https://github.com/betagouv/django-magicauth.git
 
 ```
 
-1. Add "magicauth" to your INSTALLED_APPS in `settings.py`
+2. Add "magicauth" to your INSTALLED_APPS in `settings.py`
 
 ```python
 INSTALLED_APPS = [
@@ -43,19 +43,29 @@ urlpatterns = [
 urlpatterns.extend(magicauth_urls)
 ```
 
-3. Add the following items in your project's `settings.py`
+3. Add the following items in your project's settings.py`
 
 ```
 MAGICAUTH_FROM_EMAIL=e.g. 'contact@mysite.com'
 MAGICAUTH_LOGGED_IN_REDIRECT_URL_NAME=e.g. 'home'
 ```
 
-3. Run `python manage.py migrate` to create the polls models.
+4. Run `python manage.py migrate` to create the polls models.
 
-4. Setup your (mailer)[https://docs.djangoproject.com/en/2.2/topics/email/#console-backend] in `settings.py`
+5. Setup your (mailer)[https://docs.djangoproject.com/en/2.2/topics/email/#console-backend] in `settings.py`
 In dev mode, you can use a (console mailer)[https://docs.djangoproject.com/en/2.2/topics/email/#console-backend]
 
+6. Make sure you have the following middlewares
+```
+MIDDLEWARE = [
+    # [...] other middleware you may have
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.sites.middleware.CurrentSiteMiddleware",
+]
 
+```
 ## Contribute to Magic auth
 
 To contribute to magicauth, you can install the package in the "editable" mode 
