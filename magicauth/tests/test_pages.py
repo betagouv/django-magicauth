@@ -6,8 +6,7 @@ from django.shortcuts import reverse
 from django.utils import timezone
 
 from magicauth.models import MagicToken
-
-from . import factories
+from magicauth.tests import factories
 
 pytestmark = mark.django_db
 

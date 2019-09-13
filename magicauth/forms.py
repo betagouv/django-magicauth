@@ -4,8 +4,8 @@ from django.core.mail import send_mail
 from django.template import loader
 from django.utils.module_loading import import_string
 
-from . import settings as magicauth_settings
-from .models import MagicToken
+from magicauth import settings as magicauth_settings
+from magicauth.models import MagicToken
 
 
 email_unknown_callback = import_string(magicauth_settings.EMAIL_UNKNOWN_CALLBACK)
