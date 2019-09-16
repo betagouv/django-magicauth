@@ -7,9 +7,10 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import generic
 
-from .forms import EmailForm
-from .models import MagicToken
-from . import settings as magicauth_settings
+
+from magicauth.forms import EmailForm
+from magicauth.models import MagicToken
+from magicauth import settings as magicauth_settings
 
 
 class LoginView(generic.FormView):

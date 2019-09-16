@@ -34,6 +34,9 @@ VALIDATE_TOKEN_URL = getattr(django_settings, 'MAGICAUTH_VALIDATE_TOKEN_URL', 'c
 LOGGED_IN_REDIRECT_URL_NAME = getattr(django_settings, 'MAGICAUTH_LOGGED_IN_REDIRECT_URL_NAME')
 LOGOUT_URL_NAME = getattr(django_settings, 'MAGICAUTH_LOGOUT_URL_NAME', 'logout')
 
+# Name of the field in your User model that contains the email
+EMAIL_FIELD = getattr(django_settings, 'MAGICAUTH_EMAIL_FIELD', "username")
+
 # Other
 # How long a token stays valid. When using an expired token, user will be prompted to get a new one.
 TOKEN_DURATION_SECONDS = getattr(django_settings, 'MAGICAUTH_TOKEN_DURATION_SECONDS', 5 * 60)
