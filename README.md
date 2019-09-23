@@ -4,7 +4,9 @@ Authentifiez vos utilisateurs sans mot de passe avec Django Magicauth
 
 ## Fonctionnement (FR)
 
-Django Magicauth 
+Lorsqu'un service utilise Django Magicauth, les utilisateurs s'authentifient en entrant leur adresse email.
+Ils reçoivent alors un email avec un lien de connexion.
+S'ils cliquent sur le lien, ils sont authentifiés et redirigés sur le service.
 
 ## How it works (EN)
 
@@ -21,7 +23,6 @@ pip install git+https://github.com/betagouv/django-magicauth.git
 ```
 
 2. Add "magicauth" to your INSTALLED_APPS in `settings.py`
-
 ```python
 INSTALLED_APPS = [
     # all your apps
