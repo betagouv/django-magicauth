@@ -14,7 +14,7 @@ setup(
     include_package_data=True,
     license="",
     description="Password-less authentication: login by clicking on "
-                "a magic link received by email.",
+    "a magic link received by email.",
     long_description=README,
     url="",
     author="",
