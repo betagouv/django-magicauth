@@ -1,1 +1,1 @@
-default_app_config = 'magicauth.apps.MagicauthConfig'
+default_app_config = "magicauth.apps.MagicauthConfig"
