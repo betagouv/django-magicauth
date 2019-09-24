@@ -2,9 +2,9 @@ SECRET_KEY = "can you keep a secret?"
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
 
-ROOT_URLCONF = "magicauth.tests.test_url"
+ROOT_URLCONF = "tests.test_url"
 
-INSTALLED_APPS = ["django.contrib.auth", "django.contrib.contenttypes", "magicauth"]
+INSTALLED_APPS = ["tests",  "django.contrib.auth", "django.contrib.contenttypes", "magicauth"]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
