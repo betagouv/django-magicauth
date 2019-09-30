@@ -1,0 +1,7 @@
+django
+pytest
+pytest-django
+
+flake8
+tox
+

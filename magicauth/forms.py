@@ -14,7 +14,7 @@ class EmailForm(forms.Form):
     email = forms.EmailField()
 
     def clean_email(self):
-        user_email = self.cleaned_data['email']
+        user_email = self.cleaned_data["email"]
         user_email = user_email.lower()
 
         email_field = magicauth_settings.EMAIL_FIELD
@@ -28,7 +28,7 @@ class EmailForm(forms.Form):
         return token
 
     def send_email(self, request):
-        user_email = self.cleaned_data['email']
+        user_email = self.cleaned_data["email"]
         email_field = magicauth_settings.EMAIL_FIELD
         field_lookup = {f"{email_field}__iexact": user_email}
         user = get_user_model().objects.get(**field_lookup)
@@ -37,11 +37,7 @@ class EmailForm(forms.Form):
         html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
         text_template = magicauth_settings.EMAIL_TEXT_TEMPLATE
         from_email = magicauth_settings.FROM_EMAIL
-        context = {
-            'token': token,
-            'user': user,
-            'site': request.site,
-        }
+        context = {"token": token, "user": user, "site": request.site}
         text_message = loader.render_to_string(text_template, context)
         html_message = loader.render_to_string(html_template, context)
         send_mail(

@@ -5,7 +5,7 @@ from faker import Factory as FakerFactory
 
 from pytest_factoryboy import register
 
-faker = FakerFactory.create('fr_FR')
+faker = FakerFactory.create("fr_FR")
 
 
 @register
@@ -22,4 +22,4 @@ class MagicTokenFactory(factory.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
 
     class Meta:
-        model = 'magicauth.MagicToken'
+        model = "magicauth.MagicToken"
