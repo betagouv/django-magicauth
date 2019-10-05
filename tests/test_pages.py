@@ -46,6 +46,15 @@ def test_posting_email_for_valid_existing_user_sends_email(client):
     assert "?next=/test_home/" in mail.outbox[0].body
 
 
+def test_posting_email_for_valid_existing_user_sends_email_and_next_info(client):
+    user = factories.UserFactory()
+    url = reverse("magicauth-login") + "?next=/test_dashboard/"
+    data = {"email": user.email}
+    client.post(url, data=data)
+    assert len(mail.outbox) == 1
+    assert "?next=/test_dashboard/" in mail.outbox[0].body
+
+
 def test_posting_unknown_email_does_not_send_email(client):
     url = reverse("magicauth-login")
     data = {"email": "unknown@email.com"}
@@ -69,6 +78,17 @@ def test_opening_magic_link_with_valid_token_redirects(client):
     response = client.get(url)
     assert response.status_code == 302
     assert response.url == "/test_home/"
+
+
+def test_opening_magic_link_with_a_next_sets_a_new_url(client):
+    token = factories.MagicTokenFactory()
+    url = (
+        reverse("magicauth-validate-token", kwargs={"key": token.key})
+        + "?next=/test_dashboard/"
+    )
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url == "/test_dashboard/"
 
 
 def test_token_is_removed_after_visiting_magic_link(client):
