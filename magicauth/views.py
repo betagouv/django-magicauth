@@ -26,10 +26,14 @@ class LoginView(FormView):
             "LOGGED_IN_REDIRECT_URL_NAME"
         ] = magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
+        context["next_view"] = self.request.GET.get(
+            "next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
+        )
         return context
 
-    def form_valid(self, form):
-        form.send_email(self.request)
+    def form_valid(self, form, *args, **kwargs):
+        next_view = self.get_context_data().get("next_view")
+        form.send_email(self.request, next_view)
         return super().form_valid(form)
 
 
