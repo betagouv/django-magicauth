@@ -52,11 +52,16 @@ class ValidateTokenView(View):
     and either logs in or shows a form to make a new token.
     """
 
-    def get_valid_token(self, key):
+    @staticmethod
+    def get_valid_token(key):
         duration = magicauth_settings.TOKEN_DURATION_SECONDS
-        token = MagicToken.objects.filter(key=key).first()
-        if not token:
+        try:
+            token = MagicToken.objects.get(key=key)
+        except MagicToken.DoesNotExist:
             return None
+        except MagicToken.MultipleObjectsReturned:
+            return None
+
         if token.created < timezone.now() - timedelta(seconds=duration):
             token.delete()
             return None
