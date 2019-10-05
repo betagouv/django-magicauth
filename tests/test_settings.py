@@ -4,12 +4,17 @@ DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
 
 ROOT_URLCONF = "tests.test_url"
 
-INSTALLED_APPS = ["tests",  "django.contrib.auth", "django.contrib.contenttypes", "magicauth"]
+INSTALLED_APPS = [
+    "tests",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "magicauth",
+]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 MAGICAUTH_FROM_EMAIL = "user@domain.user"
-MAGICAUTH_LOGGED_IN_REDIRECT_URL_NAME = "home"
+MAGICAUTH_LOGGED_IN_REDIRECT_URL_NAME = "test_home"
 
 
 TEMPLATES = [
