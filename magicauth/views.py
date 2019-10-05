@@ -5,15 +5,13 @@ from django.contrib.auth import login
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views import generic
-
-
+from django.views.generic import View, FormView, TemplateView
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
 from magicauth import settings as magicauth_settings
 
 
-class LoginView(generic.FormView):
+class LoginView(FormView):
     """
     The login page. The user enters their email in the form to get a link by email.
     """
@@ -35,7 +33,7 @@ class LoginView(generic.FormView):
         return super().form_valid(form)
 
 
-class EmailSentView(generic.TemplateView):
+class EmailSentView(TemplateView):
     """
     View shown to confirm the email has been sent.
     """
