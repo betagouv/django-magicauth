@@ -20,6 +20,13 @@ class LoginView(FormView):
     success_url = reverse_lazy("magicauth-email-sent")
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
 
+    def get(self, request, *args, **kwargs):
+        next_view = self.request.GET.get("next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/")
+        if request.user.is_authenticated:
+            return redirect(next_view)
+
+        return super(LoginView, self).get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(LoginView, self).get_context_data(**kwargs)
         context[

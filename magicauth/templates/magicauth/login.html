@@ -14,21 +14,12 @@
                 {% csrf_token %}
 
                 <div class="card-body p-4">
-                  {% if user.is_authenticated %}
-                    <div class="alert alert-info text-center" role="alert">
-                      Vous êtes déjà connecté
+                  {% if messages %}
+                    <div class="text-center" role="alert">
+                      {% for message in messages %}
+                      <p {% if message.tags %}class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</p>
+                      {% endfor %}
                     </div>
-                    <div class="text-center">
-                      <a href="{% url LOGGED_IN_REDIRECT_URL_NAME %}" class="btn btn-success">Accédez à l'accueil</a>
-                      <a href="{% url LOGOUT_URL_NAME %}" class="btn btn-warning">Déconnectez-vous</a>
-                    </div>
-                  {% else %}
-                    {% if messages %}
-                      <div class="text-center" role="alert">
-                        {% for message in messages %}
-                          <p {% if message.tags %}class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</p>
-                        {% endfor %}
-                      </div>
                     {% endif %}
 
                     <div class="form-group">
@@ -42,7 +33,6 @@
                     <div class="form-footer">
                       <button type="submit" class="btn btn-primary btn-block">Valider</button>
                     </div>
-                  {% endif %}
                 </div>
               </form>
             </div>

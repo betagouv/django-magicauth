@@ -4,12 +4,24 @@ from pytest import mark
 from django.core import mail
 from django.shortcuts import reverse
 from django.utils import timezone
-
 from magicauth.models import MagicToken
 from tests import factories
 
 pytestmark = mark.django_db
 
+
+def test_getting_LoginView_while_authenticated_redirects(client):
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = reverse("magicauth-login")
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url == "/test_home/"
+
+    url = reverse("magicauth-login") + "?next=/test_dashboard/"
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url == "/test_dashboard/"
 
 def test_posting_email_for_valid_existing_user_redirects(client):
     user = factories.UserFactory()
