@@ -1,5 +1,5 @@
+import re
 from datetime import timedelta
-
 from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import redirect
@@ -21,7 +21,9 @@ class LoginView(FormView):
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
 
     def get(self, request, *args, **kwargs):
-        next_view = self.request.GET.get("next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/")
+        next_view = self.request.GET.get(
+            "next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
+        )
         if request.user.is_authenticated:
             return redirect(next_view)
 
@@ -75,9 +77,12 @@ class ValidateTokenView(View):
         return token
 
     def get(self, request, *args, **kwargs):
-        url = request.GET.get(
-            "next", reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
-        )
+
+        full_path = request.get_full_path()
+        rule_for_redirect = re.compile("(.*next=)(.*)")
+        next_view = rule_for_redirect.match(full_path)
+        redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
+        url = next_view.group(1) if next_view else redirect_default
 
         if request.user.is_authenticated:
             return redirect(url)
