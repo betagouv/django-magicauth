@@ -77,13 +77,14 @@ class ValidateTokenView(View):
         return token
 
     def get(self, request, *args, **kwargs):
-
         full_path = request.get_full_path()
+        print("## full path", full_path)
+
         rule_for_redirect = re.compile("(.*next=)(.*)")
         next_view = rule_for_redirect.match(full_path)
         redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
         url = next_view.group(1) if next_view else redirect_default
-
+        print("## url", url)
         if request.user.is_authenticated:
             return redirect(url)
         token_key = kwargs.get("key")
