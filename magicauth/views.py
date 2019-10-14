@@ -86,7 +86,8 @@ class ValidateTokenView(View):
         rule_for_redirect = re.compile("(.*next=)(.*)")
         next_view = rule_for_redirect.match(full_path)
         redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
-        url = next_view.group(1) if next_view else redirect_default
+        url = next_view.group(2) if next_view else redirect_default
+
         logging.warning("## url")
         logging.warning(url)
         if request.user.is_authenticated:
