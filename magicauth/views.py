@@ -9,8 +9,6 @@ from django.views.generic import View, FormView, TemplateView
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
 from magicauth import settings as magicauth_settings
-import logging
-
 
 
 class LoginView(FormView):
@@ -80,16 +78,12 @@ class ValidateTokenView(View):
 
     def get(self, request, *args, **kwargs):
         full_path = request.get_full_path()
-        logging.warning("## full path : ")
-        logging.warning(full_path)
 
         rule_for_redirect = re.compile("(.*next=)(.*)")
         next_view = rule_for_redirect.match(full_path)
         redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
         url = next_view.group(2) if next_view else redirect_default
 
-        logging.warning("## url")
-        logging.warning(url)
         if request.user.is_authenticated:
             return redirect(url)
         token_key = kwargs.get("key")
