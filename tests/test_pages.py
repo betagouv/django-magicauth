@@ -10,7 +10,7 @@ from tests import factories
 pytestmark = mark.django_db
 
 
-def test_getting_LoginView_while_authenticated_redirects(client):
+def test_getting_LoginView_while_authenticated_redirects_to_default(client):
     user = factories.UserFactory()
     client.force_login(user)
     url = reverse("magicauth-login")
@@ -18,6 +18,10 @@ def test_getting_LoginView_while_authenticated_redirects(client):
     assert response.status_code == 302
     assert response.url == "/test_home/"
 
+
+def test_getting_LoginView_while_authenticated_with_next_redirects_to_next(client):
+    user = factories.UserFactory()
+    client.force_login(user)
     url = reverse("magicauth-login") + "?next=/test_dashboard/"
     response = client.get(url)
     assert response.status_code == 302
@@ -58,12 +62,19 @@ def test_posting_email_for_valid_existing_user_sends_email(client):
     assert "?next=/test_home/" in mail.outbox[0].body
 
 
-def test_posting_email_for_valid_existing_user_sends_email_and_next_info(client):
+def test_posting_email_redirect_to_default_view(client):
+    user = factories.UserFactory()
+    url = reverse("magicauth-login")
+    data = {"email": user.email}
+    client.post(url, data=data)
+    assert "?next=/test_home/" in mail.outbox[0].body
+
+
+def test_posting_email_with_next_redirects_to_next(client):
     user = factories.UserFactory()
     url = reverse("magicauth-login") + "?next=/test_dashboard/"
     data = {"email": user.email}
     client.post(url, data=data)
-    assert len(mail.outbox) == 1
     assert "?next=/test_dashboard/" in mail.outbox[0].body
 
 
@@ -96,11 +107,11 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     token = factories.MagicTokenFactory()
     url = (
         reverse("magicauth-validate-token", kwargs={"key": token.key})
-        + "?next=/test_dashboard/"
+        + "?next=/test_dashboard/?a=test&b=test"
     )
     response = client.get(url)
     assert response.status_code == 302
-    assert response.url == "/test_dashboard/"
+    assert response.url == "/test_dashboard/?a=test&b=test"
 
 
 def test_token_is_removed_after_visiting_magic_link(client):
