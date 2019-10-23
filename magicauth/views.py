@@ -1,19 +1,17 @@
+import re
 from datetime import timedelta
-
 from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views import generic
-
-
+from django.views.generic import View, FormView, TemplateView
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
 from magicauth import settings as magicauth_settings
 
 
-class LoginView(generic.FormView):
+class LoginView(FormView):
     """
     The login page. The user enters their email in the form to get a link by email.
     """
@@ -21,6 +19,15 @@ class LoginView(generic.FormView):
     form_class = EmailForm
     success_url = reverse_lazy("magicauth-email-sent")
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
+
+    def get(self, request, *args, **kwargs):
+        next_view = self.request.GET.get(
+            "next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
+        )
+        if request.user.is_authenticated:
+            return redirect(next_view)
+
+        return super(LoginView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(LoginView, self).get_context_data(**kwargs)
@@ -30,12 +37,17 @@ class LoginView(generic.FormView):
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
         return context
 
-    def form_valid(self, form):
-        form.send_email(self.request)
+    def form_valid(self, form, *args, **kwargs):
+        next_view = self.request.GET.get(
+            "next",
+            f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
+        )
+        current_site = self.request.site
+        form.send_email(current_site, next_view)
         return super().form_valid(form)
 
 
-class EmailSentView(generic.TemplateView):
+class EmailSentView(TemplateView):
     """
     View shown to confirm the email has been sent.
     """
@@ -43,28 +55,38 @@ class EmailSentView(generic.TemplateView):
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
-class ValidateTokenView(generic.RedirectView):
+class ValidateTokenView(View):
     """
     The link sent by email goes to this view.
     It validates the token passed in querystring,
     and either logs in or shows a form to make a new token.
     """
 
-    url = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
-
-    def get_valid_token(self, key):
+    @staticmethod
+    def get_valid_token(key):
         duration = magicauth_settings.TOKEN_DURATION_SECONDS
-        token = MagicToken.objects.filter(key=key).first()
-        if not token:
+        try:
+            token = MagicToken.objects.get(key=key)
+        except MagicToken.DoesNotExist:
             return None
+        except MagicToken.MultipleObjectsReturned:
+            return None
+
         if token.created < timezone.now() - timedelta(seconds=duration):
             token.delete()
             return None
         return token
 
-    def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            return super().get(*args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        full_path = request.get_full_path()
+
+        rule_for_redirect = re.compile("(.*next=)(.*)")
+        next_view = rule_for_redirect.match(full_path)
+        redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
+        url = next_view.group(2) if next_view else redirect_default
+
+        if request.user.is_authenticated:
+            return redirect(url)
         token_key = kwargs.get("key")
         token = self.get_valid_token(token_key)
         if not token:
@@ -79,4 +101,4 @@ class ValidateTokenView(generic.RedirectView):
         MagicToken.objects.filter(
             user=token.user
         ).delete()  # Remove them all for this user
-        return super().get(*args, **kwargs)
+        return redirect(url)
