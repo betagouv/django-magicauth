@@ -63,6 +63,19 @@ class RedirectToHomeView(TemplateView):
     """
     template_name = magicauth_settings.REDIRECT_VIEW_TEMPLATE
 
+    def get_context_data(self, **kwargs):
+        context = super(RedirectToHomeView, self).get_context_data(**kwargs)
+
+        # todo don't hardcode "code"
+        code = self.request.GET.get("code", "")
+        context['code'] = code
+       # todo send readymade url : {% url 'magicauth-validate-token' token.key %}?next={{ next_view }}
+
+        # todo put that in settings somewhere
+        context['wait_seconds'] = 3
+
+        return context
+
 
 class ValidateTokenView(View):
     """

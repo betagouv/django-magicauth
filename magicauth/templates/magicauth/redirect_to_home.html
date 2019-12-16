@@ -8,6 +8,18 @@
       flex-direction: column;
     }
   </style>
+  <script>
+    console.log('hello')
+    console.log("{% url 'magicauth-validate-token' 'abcd' %}")
+    console.log("{{ code }}")
+    var code = "{{ code }}"
+    var waitSeconds = "{{ wait_seconds }}"
+
+    setTimeout(function(){
+      alert(code);
+    }, waitSeconds * 1000);
+
+  </script>
 </head>
 <body>
   <div class="page">
