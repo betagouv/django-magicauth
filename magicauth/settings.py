@@ -29,11 +29,18 @@ LOGIN_VIEW_TEMPLATE = getattr(
 EMAIL_SENT_VIEW_TEMPLATE = getattr(
     django_settings, "MAGICAUTH_EMAIL_SENT_VIEW_TEMPLATE", "magicauth/email_sent.html"
 )
+REDIRECT_VIEW_TEMPLATE = getattr(
+    django_settings, "MAGICAUTH_REDIRECT_VIEW_TEMPLATE", "magicauth/redirect_to_home.html"
+)
 
 # URLs for magicauth views
 # Once user has entered email successfully and email has been sent, show this page.
 EMAIL_SENT_URL = getattr(django_settings, "MAGICAUTH_EMAIL_SENT_URL", "email-envoyé/")
 LOGIN_URL = getattr(django_settings, "MAGICAUTH_LOGIN_URL", "login/")
+# The emailed links point to this url, which then redirects to the VALIDATE_TOKEN_URL.
+# The redirection step is there so that antispam email clients do not invalidate the token : they visit all links in
+# email to verify them, so if we didn't have this intermediary url, the token would be invalidated.
+REDIRECT_URL = getattr(django_settings, "MAGICAUTH_REDIRECT_URL", "redirection/")
 # The emailed links point to this url.
 # The view will look for the token in the "key" variable.
 VALIDATE_TOKEN_URL = getattr(

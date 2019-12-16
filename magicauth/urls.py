@@ -15,6 +15,11 @@ urlpatterns = [
         name="magicauth-email-sent",
     ),
     path(
+        magicauth_settings.REDIRECT_URL,
+        magicauth_views.RedirectToHomeView.as_view(),
+        name="magicauth-redirect-to-home",
+    ),
+    path(
         magicauth_settings.VALIDATE_TOKEN_URL,
         magicauth_views.ValidateTokenView.as_view(),
         name="magicauth-validate-token",

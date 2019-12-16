@@ -55,6 +55,15 @@ class EmailSentView(TemplateView):
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
+class RedirectToHomeView(TemplateView):
+    """
+    The view shows few seconds of wait, and then the user is redirected to home.
+    This is for solving an issue where antispam mail clients visit links in email to check them, and thus invalidate
+    our token.
+    """
+    template_name = magicauth_settings.REDIRECT_VIEW_TEMPLATE
+
+
 class ValidateTokenView(View):
     """
     The link sent by email goes to this view.
