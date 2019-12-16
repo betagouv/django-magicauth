@@ -10,13 +10,11 @@
   </style>
   <script>
     console.log('hello')
-    console.log("{% url 'magicauth-validate-token' 'abcd' %}")
-    console.log("{{ code }}")
-    var code = "{{ code }}"
+    var url = "{{ url }}"
     var waitSeconds = "{{ wait_seconds }}"
 
     setTimeout(function(){
-      alert(code);
+      window.location.replace(url);
     }, waitSeconds * 1000);
 
   </script>

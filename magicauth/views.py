@@ -66,12 +66,12 @@ class RedirectToHomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(RedirectToHomeView, self).get_context_data(**kwargs)
 
-        # todo don't hardcode "code"
-        code = self.request.GET.get("code", "")
-        context['code'] = code
-       # todo send readymade url : {% url 'magicauth-validate-token' token.key %}?next={{ next_view }}
+        token = self.request.GET.get("code", "") # todo don't hardcode "code". Should it be /code/blah or ?code=blah ?
+        url = f"{reverse_lazy('magicauth-validate-token', kwargs={ 'key': token })}"
+        context["url"] = url
+        # todo what happens if no code?
 
-        # todo put that in settings somewhere
+        # todo put that value in settings somewhere
         context['wait_seconds'] = 3
 
         return context
