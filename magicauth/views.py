@@ -55,23 +55,23 @@ class EmailSentView(TemplateView):
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
-class RedirectToHomeView(TemplateView):
+class WaitView(TemplateView):
     """
-    The view shows few seconds of wait, and then the user is redirected to home.
+    The view shows few seconds of wait, and then the user is redirected to login.
     This is for solving an issue where antispam mail clients visit links in email to check them, and thus invalidate
     our token.
     """
-    template_name = magicauth_settings.REDIRECT_VIEW_TEMPLATE
+    template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
     def get_context_data(self, **kwargs):
-        context = super(RedirectToHomeView, self).get_context_data(**kwargs)
+        context = super(WaitView, self).get_context_data(**kwargs)
 
         token_key = kwargs.get("key")
         url = f"{reverse_lazy('magicauth-validate-token', kwargs={ 'key': token_key })}"
         context["url"] = url
 
         # todo put that value in settings somewhere
-        context["REDIRECT_WAIT_SECONDS"] = magicauth_settings.REDIRECT_WAIT_SECONDS
+        context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
 
         return context
 

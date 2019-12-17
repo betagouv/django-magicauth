@@ -15,9 +15,9 @@ urlpatterns = [
         name="magicauth-email-sent",
     ),
     path(
-        magicauth_settings.REDIRECT_URL,
-        magicauth_views.RedirectToHomeView.as_view(),
-        name="magicauth-redirect-to-home",
+        magicauth_settings.WAIT_URL,
+        magicauth_views.WaitView.as_view(),
+        name="magicauth-wait",
     ),
     path(
         magicauth_settings.VALIDATE_TOKEN_URL,
