@@ -11,7 +11,7 @@
   <script>
     console.log('hello')
     var url = "{{ url }}"
-    var waitSeconds = "{{ wait_seconds }}"
+    var waitSeconds = "{{ REDIRECT_WAIT_SECONDS }}"
 
     setTimeout(function(){
       window.location.replace(url);
