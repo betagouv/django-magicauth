@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import login
@@ -9,6 +8,7 @@ from django.views.generic import View, FormView, TemplateView
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
 from magicauth import settings as magicauth_settings
+from magicauth.utils import get_next_view
 
 
 class LoginView(FormView):
@@ -63,24 +63,14 @@ class WaitView(TemplateView):
     """
     template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
-    # todo : reuse method
-    @staticmethod
-    def get_next_view(request):
-        full_path = request.get_full_path()
-        rule_for_redirect = re.compile("(.*next=)(.*)")
-        next_view = rule_for_redirect.match(full_path)
-        redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
-        return next_view.group(2) if next_view else redirect_default
-
     def get_context_data(self, **kwargs):
         context = super(WaitView, self).get_context_data(**kwargs)
 
-        next_view = self.get_next_view(self.request)
+        next_view = get_next_view(self.request)
         token_key = kwargs.get("key")
         url = f"{reverse_lazy('magicauth-validate-token', kwargs={ 'key': token_key })}?next={ next_view }"
         context["url"] = url
 
-        # todo put that value in settings somewhere
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
 
         return context
@@ -108,16 +98,8 @@ class ValidateTokenView(View):
             return None
         return token
 
-    @staticmethod
-    def get_next_view(request):
-        full_path = request.get_full_path()
-        rule_for_redirect = re.compile("(.*next=)(.*)")
-        next_view = rule_for_redirect.match(full_path)
-        redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
-        return next_view.group(2) if next_view else redirect_default
-
     def get(self, request, *args, **kwargs):
-        url = self.get_next_view(request)
+        url = get_next_view(request)
 
         if request.user.is_authenticated:
             return redirect(url)
