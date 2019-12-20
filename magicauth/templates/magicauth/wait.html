@@ -9,10 +9,10 @@
     }
   </style>
   <script>
-    console.log('hello')
-    var url = "{{ url }}"
-    var waitSeconds = "{{ WAIT_SECONDS }}"
+    var url = '{{ url }}'
+    var waitSeconds = {{ WAIT_SECONDS }}
 
+    console.debug('Redirecting to', url, 'in', waitSeconds, 'seconds')
     setTimeout(function(){
       window.location.replace(url);
     }, waitSeconds * 1000);
