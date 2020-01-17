@@ -21,12 +21,9 @@ class LoginView(FormView):
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
 
     def get(self, request, *args, **kwargs):
-        next_view = self.request.GET.get(
-            "next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
-        )
-        if request.user.is_authenticated:
-            return redirect(next_view)
-
+        next_url = self.request.GET.get("next")
+        if request.user.is_authenticated and next_url:
+            return redirect(next_url)
         return super(LoginView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
