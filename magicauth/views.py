@@ -11,7 +11,23 @@ from magicauth import settings as magicauth_settings
 from magicauth.utils import get_next_view
 
 
-class LoginView(FormView):
+class NextUrlMixin(object):
+    """
+    Helper for managing the 'next url' parameter.
+    """
+
+    def get_next_url(self, request):
+        """
+        Get the next url from the querystring parameters (?next=/my/next/page).
+        If the next parameter is not there, returns the default redirect url
+        """
+        next_url = request.GET.get("next")
+        if not next_url:
+            next_url = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
+        return next_url
+
+
+class LoginView(NextUrlMixin, FormView):
     """
     The login page. The user enters their email in the form to get a link by email.
     """
@@ -21,12 +37,9 @@ class LoginView(FormView):
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
 
     def get(self, request, *args, **kwargs):
-        next_view = self.request.GET.get(
-            "next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
-        )
         if request.user.is_authenticated:
-            return redirect(next_view)
-
+            next_url = self.get_next_url(self.request)
+            return redirect(next_url)
         return super(LoginView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -38,12 +51,9 @@ class LoginView(FormView):
         return context
 
     def form_valid(self, form, *args, **kwargs):
-        next_view = self.request.GET.get(
-            "next",
-            f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
-        )
+        next_url = self.get_next_url(self.request)
         current_site = self.request.site
-        form.send_email(current_site, next_view)
+        form.send_email(current_site, next_url)
         return super().form_valid(form)
 
 
@@ -55,7 +65,7 @@ class EmailSentView(TemplateView):
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
-class WaitView(TemplateView):
+class WaitView(NextUrlMixin, TemplateView):
     """
     The view shows few seconds of wait, and then the user is redirected to login.
     This is for solving an issue where antispam mail clients visit links in email to check them, and thus invalidate
@@ -66,9 +76,9 @@ class WaitView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(WaitView, self).get_context_data(**kwargs)
 
-        next_view = get_next_view(self.request)
+        next_url = self.get_next_url(self.request)
         token_key = kwargs.get("key")
-        url = f"{reverse_lazy('magicauth-validate-token', kwargs={ 'key': token_key })}?next={ next_view }"
+        url = f"{reverse_lazy('magicauth-validate-token', kwargs={ 'key': token_key })}?next={ next_url }"
         context["url"] = url
 
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
@@ -76,7 +86,7 @@ class WaitView(TemplateView):
         return context
 
 
-class ValidateTokenView(View):
+class ValidateTokenView(NextUrlMixin, View):
     """
     The link sent by email goes to this view.
     It validates the token passed in querystring,
