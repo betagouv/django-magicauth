@@ -27,6 +27,12 @@ class NextUrlMixin(object):
             next_url = reverse(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
         return next_url
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        next_url = self.get_next_url(self.request)
+        context["next_url"] = urllib.parse.quote(next_url)
+        return context
+
 
 class LoginView(NextUrlMixin, FormView):
     """
@@ -70,12 +76,6 @@ class EmailSentView(NextUrlMixin, TemplateView):
     """
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
-    def get_context_data(self, **kwargs):
-        context = super(EmailSentView, self).get_context_data(**kwargs)
-        next_url = self.get_next_url(self.request)
-        context["next_url"] = urllib.parse.quote(next_url)
-        return context
-
 
 class WaitView(NextUrlMixin, TemplateView):
     """
@@ -86,15 +86,13 @@ class WaitView(NextUrlMixin, TemplateView):
     template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
     def get_context_data(self, **kwargs):
-        context = super(WaitView, self).get_context_data(**kwargs)
-
-        next_url = self.get_next_url(self.request)
+        context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        url = f"{reverse_lazy('magicauth-validate-token', kwargs={ 'key': token_key })}?next={ next_url }"
+        next_url = context["next_url"]
+        validate_token_url = reverse('magicauth-validate-token', kwargs={ 'key': token_key })
+        url = f"{validate_token_url}?next={next_url}"
         context["url"] = url
-
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
-
         return context
 
 
