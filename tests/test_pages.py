@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pytest import mark
+import urllib.parse
 
 from django.core import mail
 from django.shortcuts import reverse
@@ -106,13 +107,14 @@ def test_opening_magic_link_with_valid_token_redirects(client):
 
 def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     token = factories.MagicTokenFactory()
-    url = (
-        reverse("magicauth-validate-token", kwargs={"key": token.key})
-        + "?next=/test_dashboard/?a=test&b=test"
-    )
+    next_url_raw = "/test_dashboard/?a=test&b=test"
+    # We use `quote` because the URL has parameters:
+    next_url = urllib.parse.quote(next_url_raw)
+    validate_token_url = reverse("magicauth-validate-token", kwargs={"key": token.key})
+    url = f'{validate_token_url}?next={next_url}'
     response = client.get(url)
     assert response.status_code == 302
-    assert response.url == "/test_dashboard/?a=test&b=test"
+    assert response.url == next_url_raw
 
 
 def test_token_is_removed_after_visiting_magic_link(client):

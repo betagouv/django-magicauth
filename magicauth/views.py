@@ -10,7 +10,6 @@ from django.views.generic import View, FormView, TemplateView
 from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
-from magicauth.utils import get_next_view
 
 
 class NextUrlMixin(object):
@@ -112,7 +111,7 @@ class ValidateTokenView(NextUrlMixin, View):
         return token
 
     def get(self, request, *args, **kwargs):
-        url = get_next_view(request)
+        url = self.get_next_url(request)
         if request.user.is_authenticated:
             return redirect(url)
         token_key = kwargs.get("key")
