@@ -49,8 +49,8 @@ def test_authenticated_user_is_redirected_to_default_redirect_page(client):
 def test_authenticated_user_is_redirected_to_next_url(client):
     user = factories.UserFactory()
     client.force_login(user)
-    url = reverse("magicauth-login") + "?next=/test_dashboard/"
-    response = client.get(url)
+    url = reverse("magicauth-login")
+    response = client.get(url, {"next": "/test_dashboard/"})
     assert response.status_code == 302
     assert response.url == "/test_dashboard/"
 
@@ -163,3 +163,8 @@ def test_expired_token_is_deleted(client):
     url = reverse("magicauth-validate-token", args=[token.key])
     client.get(url)
     assert token not in MagicToken.objects.all()
+
+def test_sent_page_contains_next_redirect_url(client):
+    url = reverse("magicauth-email-sent")
+    response = client.get(url, data={'next': "/test_dashboard"})
+    assert "?next=/test_dashboard" in str(response.content)
