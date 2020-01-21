@@ -1,6 +1,6 @@
 Bonjour {{ user.first_name }} {{ user.last_name }},
 
-Pour accéder à {{ site.domain }}, vous avez juste à cliquer sur ce lien de connexion:  https://{{ site.domain }}{% url 'magicauth-wait' token.key %}?next={{ next_view }}
+Pour accéder à {{ site.domain }}, vous avez juste à cliquer sur ce lien de connexion:  https://{{ site.domain }}{% url 'magicauth-wait' token.key %}?next={{ next_view|urlencode }}
 
 Bonne journée,
 

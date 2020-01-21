@@ -1,13 +1,15 @@
 from datetime import timedelta
+import urllib.parse
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic import View, FormView, TemplateView
+from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
-from magicauth import settings as magicauth_settings
 from magicauth.utils import get_next_view
 
 
@@ -23,7 +25,7 @@ class NextUrlMixin(object):
         """
         next_url = request.GET.get("next")
         if not next_url:
-            next_url = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
+            next_url = reverse(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
         return next_url
 
 
@@ -52,6 +54,7 @@ class LoginView(NextUrlMixin, FormView):
 
     def form_valid(self, form, *args, **kwargs):
         next_url = self.get_next_url(self.request)
+        next_url = urllib.parse.quote(next_url)
         current_site = self.request.site
         form.send_email(current_site, next_url)
         return super().form_valid(form)
@@ -110,7 +113,6 @@ class ValidateTokenView(NextUrlMixin, View):
 
     def get(self, request, *args, **kwargs):
         url = get_next_view(request)
-
         if request.user.is_authenticated:
             return redirect(url)
         token_key = kwargs.get("key")
