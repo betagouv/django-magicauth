@@ -34,7 +34,6 @@ class LoginView(NextUrlMixin, FormView):
     """
 
     form_class = EmailForm
-    success_url = reverse_lazy("magicauth-email-sent")
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
 
     def get(self, request, *args, **kwargs):
@@ -51,6 +50,12 @@ class LoginView(NextUrlMixin, FormView):
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
         return context
 
+    def get_success_url(self, **kwargs):
+        url = reverse_lazy("magicauth-email-sent")
+        next_url = self.get_next_url(self.request)
+        next_url = urllib.parse.quote(next_url)
+        return f"{url}?next={next_url}"
+
     def form_valid(self, form, *args, **kwargs):
         next_url = self.get_next_url(self.request)
         next_url = urllib.parse.quote(next_url)
@@ -59,12 +64,17 @@ class LoginView(NextUrlMixin, FormView):
         return super().form_valid(form)
 
 
-class EmailSentView(TemplateView):
+class EmailSentView(NextUrlMixin, TemplateView):
     """
     View shown to confirm the email has been sent.
     """
-
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
+
+    def get_context_data(self, **kwargs):
+        context = super(EmailSentView, self).get_context_data(**kwargs)
+        next_url = self.get_next_url(self.request)
+        context["next_url"] = urllib.parse.quote(next_url)
+        return context
 
 
 class WaitView(NextUrlMixin, TemplateView):
