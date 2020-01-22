@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <link href="https://tabler.github.io/tabler/assets/css/dashboard.css" rel="stylesheet">
+  <style>
+    .flex-column {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+  <script>
+    var url = '{{ url }}'
+    var waitSeconds = {{ WAIT_SECONDS }}
+
+    console.debug('Redirecting to', url, 'in', waitSeconds, 'seconds')
+    setTimeout(function(){
+      window.location.replace(url);
+    }, waitSeconds * 1000);
+
+  </script>
+</head>
+<body>
+  <div class="page">
+    <div class="flex-column justify-content-center align-items-center">
+      <div class="card col-login">
+        <div class="card-body flex-column align-items-center bg-info text-white">
+          <h1>En chargement...</h1>
+          <div class="mb-6">Veuillez patienter quelques instants</div>
+          <div class="loader"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
