@@ -1,32 +1,51 @@
 from datetime import timedelta
+import urllib.parse
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic import View, FormView, TemplateView
+from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
-from magicauth import settings as magicauth_settings
-from magicauth.utils import get_next_view
 
 
-class LoginView(FormView):
+class NextUrlMixin(object):
+    """
+    Helper for managing the 'next url' parameter.
+    """
+
+    def get_next_url(self, request):
+        """
+        Get the next url from the querystring parameters (?next=/my/next/page).
+        If the next parameter is not there, returns the default redirect url
+        """
+        next_url = request.GET.get("next")
+        if not next_url:
+            next_url = reverse(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
+        return next_url
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        next_url = self.get_next_url(self.request)
+        context["next_url"] = urllib.parse.quote(next_url)
+        return context
+
+
+class LoginView(NextUrlMixin, FormView):
     """
     The login page. The user enters their email in the form to get a link by email.
     """
 
     form_class = EmailForm
-    success_url = reverse_lazy("magicauth-email-sent")
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
 
     def get(self, request, *args, **kwargs):
-        next_view = self.request.GET.get(
-            "next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
-        )
         if request.user.is_authenticated:
-            return redirect(next_view)
-
+            next_url = self.get_next_url(self.request)
+            return redirect(next_url)
         return super(LoginView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -37,25 +56,28 @@ class LoginView(FormView):
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
         return context
 
+    def get_success_url(self, **kwargs):
+        url = reverse_lazy("magicauth-email-sent")
+        next_url = self.get_next_url(self.request)
+        next_url = urllib.parse.quote(next_url)
+        return f"{url}?next={next_url}"
+
     def form_valid(self, form, *args, **kwargs):
-        next_view = self.request.GET.get(
-            "next",
-            f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
-        )
+        next_url = self.get_next_url(self.request)
+        next_url = urllib.parse.quote(next_url)
         current_site = self.request.site
-        form.send_email(current_site, next_view)
+        form.send_email(current_site, next_url)
         return super().form_valid(form)
 
 
-class EmailSentView(TemplateView):
+class EmailSentView(NextUrlMixin, TemplateView):
     """
     View shown to confirm the email has been sent.
     """
-
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
-class WaitView(TemplateView):
+class WaitView(NextUrlMixin, TemplateView):
     """
     The view shows few seconds of wait, and then the user is redirected to login.
     This is for solving an issue where antispam mail clients visit links in email to check them, and thus invalidate
@@ -64,19 +86,17 @@ class WaitView(TemplateView):
     template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
     def get_context_data(self, **kwargs):
-        context = super(WaitView, self).get_context_data(**kwargs)
-
-        next_view = get_next_view(self.request)
+        context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        url = f"{reverse_lazy('magicauth-validate-token', kwargs={ 'key': token_key })}?next={ next_view }"
+        next_url = context["next_url"]
+        validate_token_url = reverse('magicauth-validate-token', kwargs={ 'key': token_key })
+        url = f"{validate_token_url}?next={next_url}"
         context["url"] = url
-
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
-
         return context
 
 
-class ValidateTokenView(View):
+class ValidateTokenView(NextUrlMixin, View):
     """
     The link sent by email goes to this view.
     It validates the token passed in querystring,
@@ -99,8 +119,7 @@ class ValidateTokenView(View):
         return token
 
     def get(self, request, *args, **kwargs):
-        url = get_next_view(request)
-
+        url = self.get_next_url(request)
         if request.user.is_authenticated:
             return redirect(url)
         token_key = kwargs.get("key")
