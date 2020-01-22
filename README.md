@@ -69,18 +69,21 @@ MIDDLEWARE = [
 ```
 ## Contribute to Magic auth
 
-To contribute to magicauth, you can install the package in the "editable" mode 
+To contribute to magicauth, you can install the package in the "editable" mode
 ```
 pip uninstall django-magicauth  # just in case...
 pip install -e git+https://github.com/betagouv/django-magicauth.git#egg=django-magicauth
 ```
-You can also install a specific branch, for instance for testing a PR. To install branch `my-branch` : 
+You can also install a specific branch, for instance for testing a PR. To install branch `my-branch` :
 ```
 pip install -e git+https://github.com/betagouv/django-magicauth.git@my-branch#egg=django-magicauth
 ```
 
 
 ### run tests
+
 ```
-DJANGO_SETTINGS_MODULE=magicauth.tests.settings pytest
+cd src/django-magicauth
+tox
+pytest src/django-magicauth
 ```
