@@ -20,16 +20,25 @@
                       <p {% if message.tags %}class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</p>
                       {% endfor %}
                     </div>
-                    {% endif %}
+                  {% endif %}
 
                     <div class="form-group">
                       <label class="text-uppercase form-label">Se connecter</label>
-                      <input type="email" name="email" class="form-control {% if form.errors %}state-invalid {% endif %}"
-                             id="id_email" aria-describedby="emailHelp" placeholder="Votre email" required/>
-                      {% for error in form.email.errors %}
+                      <input type="email" name="email" class="form-control {% if email_form.errors %}state-invalid {% endif %}"
+                             id="id_email" aria-describedby="emailHelp" placeholder="Votre email" value="" required/>
+                      {% for error in email_form.email.errors %}
                         <div class="alet alert-danger text-center">{{ error }}</div>
                       {% endfor %}
                     </div>
+                    {% if OTP_enabled %}
+                      <div class="form-group">
+                        <label>{{ OTP_form.otp_token.label_tag }}</label>
+                        {{ OTP_form.otp_token }}
+                        {% for error in OTP_form.otp_token.errors %}
+                          <div class="alet alert-danger text-center">{{ error }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
                     <div class="form-footer">
                       <button type="submit" class="btn btn-primary btn-block">Valider</button>
                     </div>
