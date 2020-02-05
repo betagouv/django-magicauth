@@ -66,3 +66,8 @@ EMAIL_UNKNOWN_CALLBACK = getattr(
 EMAIL_UNKNOWN_MESSAGE = getattr(
     django_settings, "MAGICAUTH_EMAIL_UNKNOWN_MESSAGE", "Aucun utilisateur trouvé."
 )
+
+ENABLE_2FA = getattr(
+    django_settings, "MAGICAUTH_ENABLE_2FA", False
+)
+

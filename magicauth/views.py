@@ -3,54 +3,66 @@ import logging
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth import login
+
 from django.http import HttpResponseNotFound
-from django.shortcuts import redirect
+from django.contrib.auth import login, get_user_model
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.http import is_safe_url
-from django.views.generic import View, FormView, TemplateView
+from django.views.generic import View, TemplateView
 
-from magicauth.forms import EmailForm
+from magicauth.forms import EmailForm, OTPForm
 from magicauth.models import MagicToken
 from magicauth import settings as magicauth_settings
 
 logger = logging.getLogger()
 
-class LoginView(FormView):
+class LoginView(View):
     """
     The login page. The user enters their email in the form to get a link by email.
     """
 
-    form_class = EmailForm
-    success_url = reverse_lazy("magicauth-email-sent")
-    template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
-
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         next_view = self.request.GET.get(
             "next", f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
         )
         if request.user.is_authenticated:
             return redirect(next_view)
+        context = {
+            "email_form": EmailForm,
+            "OTP_enabled": magicauth_settings.ENABLE_2FA,
+            "OTP_form": OTPForm(request.user),
+        }
+        return render(request, magicauth_settings.LOGIN_VIEW_TEMPLATE, context)
 
-        return super(LoginView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(LoginView, self).get_context_data(**kwargs)
-        context[
-            "LOGGED_IN_REDIRECT_URL_NAME"
-        ] = magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME
-        context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
-        return context
-
-    def form_valid(self, form, *args, **kwargs):
-        next_view = self.request.GET.get(
+    def post(self, request):
+        next_view = request.GET.get(
             "next",
             f"/{magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME}/"
         )
-        current_site = self.request.site
-        form.send_email(current_site, next_view)
-        return super().form_valid(form)
+        current_site = request.site
+        email_form = EmailForm(request.POST)
+        if email_form.is_valid() and not magicauth_settings.ENABLE_2FA:
+            email_form.send_email(current_site, next_view)
+            return redirect(reverse_lazy("magicauth-email-sent"))
+
+        elif email_form.is_valid() and magicauth_settings.ENABLE_2FA:
+            data = email_form.cleaned_data
+            email = data["email"]
+            user = get_user_model().objects.get(email=email)
+
+            OTP_form = OTPForm(user=user, data=request.POST)
+            if OTP_form.is_valid():
+                email_form.send_email(current_site, next_view)
+                return redirect(reverse_lazy("magicauth-email-sent"))
+
+        context = {
+            "email_form": email_form,
+            "OTP_enabled": magicauth_settings.ENABLE_2FA,
+            "OTP_form": OTP_form if magicauth_settings.ENABLE_2FA else OTPForm
+        }
+        return render(request, magicauth_settings.LOGIN_VIEW_TEMPLATE, context)
 
 
 class EmailSentView(TemplateView):
@@ -109,8 +121,10 @@ class ValidateTokenView(View):
                 "votre email ci-dessous puis à cliquer sur valider.",
             )
             return redirect("magicauth-login")
+
         login(self.request, token.user)
         MagicToken.objects.filter(
             user=token.user
         ).delete()  # Remove them all for this user
+
         return redirect(url)

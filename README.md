@@ -67,6 +67,12 @@ MIDDLEWARE = [
 ]
 
 ```
+
+## Enable 2FA
+Follow instructions to install django_otp and run migrations
+Set `MAGICAUTH_ENABLE_2FA` to True in your environment 
+Change your login template if you have a specific one in your app
+
 ## Contribute to Magic auth
 
 To contribute to magicauth, you can install the package in the "editable" mode
