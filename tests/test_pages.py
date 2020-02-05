@@ -6,6 +6,7 @@ from django.core import mail
 from django.shortcuts import reverse
 from django.utils import timezone
 from magicauth.models import MagicToken
+from magicauth import settings as magicauth_settings
 from tests import factories
 
 pytestmark = mark.django_db
@@ -232,3 +233,45 @@ def test_expired_token_is_deleted(client):
     url = reverse("magicauth-validate-token", args=[token.key])
     client.get(url)
     assert token not in MagicToken.objects.all()
+
+
+def test_template_displays_totp_field_when_2FA_enabled(client):
+    magicauth_settings.ENABLE_2FA = True
+    response = client.get(reverse("magicauth-login"))
+    assert response.status_code == 200
+    print(response.content)
+    assert "Entrez le code" in str(response.content)
+
+def test_template_does_not_displays_totp_field_when_2FA_disabled(client):
+    magicauth_settings.ENABLE_2FA = False
+    response = client.get(reverse("magicauth-login"))
+    assert response.status_code == 200
+    print(response.content)
+    assert "Entrez le code" not in str(response.content)
+
+
+def test_posting_good_totp_and_good_email_success(client):
+    magicauth_settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device = thierry.staticdevice_set.create()
+    device.token_set.create(token="123456")
+    data = {"email": thierry.email, "otp_token": "123456"}
+    url = reverse("magicauth-login")
+    response = client.post(url, data=data)
+    assert response.status_code == 302
+    assert len(mail.outbox) == 1
+
+
+def test_posting_wong_otp_and_good_email_error(client):
+    magicauth_settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device = thierry.staticdevice_set.create()
+    device.token_set.create(token="123456")
+    data = {"email": thierry.email, "otp_token": "567654"}
+    url = reverse("magicauth-login")
+    response = client.post(url, data=data)
+    assert response.status_code == 200
+    assert "pas valide." in str(response.content)
+    assert len(mail.outbox) == 0
