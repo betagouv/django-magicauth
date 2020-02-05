@@ -9,6 +9,8 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "magicauth",
+    "django_otp",
+    "django_otp.plugins.otp_static",
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -26,4 +28,5 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
+    "django_otp.middleware.OTPMiddleware",
 ]
