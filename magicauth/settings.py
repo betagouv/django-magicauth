@@ -96,3 +96,7 @@ EMAIL_UNKNOWN_MESSAGE = getattr(
 WAIT_SECONDS = getattr(
     django_settings, "MAGICAUTH_WAIT_SECONDS", 3
 )
+# Add 2FA with a TOTP (needs django-otp to be installed in the user's project)
+ENABLE_2FA = getattr(
+    django_settings, "MAGICAUTH_ENABLE_2FA", False
+)

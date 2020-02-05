@@ -1,11 +1,15 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.core.validators import RegexValidator
 from django.template import loader
 from django.utils.module_loading import import_string
+from django_otp import match_token
 from magicauth import settings as magicauth_settings
 from magicauth.models import MagicToken
 import math
+
 
 email_unknown_callback = import_string(magicauth_settings.EMAIL_UNKNOWN_CALLBACK)
 
@@ -19,6 +23,7 @@ class EmailForm(forms.Form):
 
         email_field = magicauth_settings.EMAIL_FIELD
         field_lookup = {f"{email_field}__iexact": user_email}
+
         if not get_user_model().objects.filter(**field_lookup).exists():
             email_unknown_callback(user_email)
         return user_email
@@ -55,3 +60,31 @@ class EmailForm(forms.Form):
             recipient_list=[user_email],
             fail_silently=False,
         )
+
+
+class OTPForm(forms.Form):
+    otp_token = forms.CharField(
+        max_length=6,
+        min_length=6,
+        validators=[RegexValidator(r"^\d{6}$")],
+        label="Entrez le code à 6 chiffres généré par votre téléphone",
+        widget=forms.TextInput(attrs={"autocomplete": "off"}),
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        super(OTPForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_otp_token(self):
+        otp_token = self.cleaned_data["otp_token"]
+        user = self.user
+        from django_otp import user_has_device, devices_for_user
+        if not user_has_device(user):
+            raise ValidationError("Vous n'avez pas d'appareil enregistré")
+
+        for device in devices_for_user(user):
+            if not device.verify_is_allowed():
+                raise ValidationError("Vous devez patienter avant de recommencer")
+            if device.verify_token(otp_token):
+                return otp_token
+        raise ValidationError("Ce code n'est pas valide.")
