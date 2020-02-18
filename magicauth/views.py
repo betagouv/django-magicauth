@@ -43,6 +43,8 @@ class LoginView(View):
         )
         current_site = request.site
         email_form = EmailForm(request.POST)
+        OTP_form = OTPForm(request.user)
+
         if email_form.is_valid() and not magicauth_settings.ENABLE_2FA:
             email_form.send_email(current_site, next_view)
             return redirect(reverse_lazy("magicauth-email-sent"))
@@ -60,7 +62,7 @@ class LoginView(View):
         context = {
             "email_form": email_form,
             "OTP_enabled": magicauth_settings.ENABLE_2FA,
-            "OTP_form": OTP_form if magicauth_settings.ENABLE_2FA else OTPForm
+            "OTP_form": OTP_form,
         }
         return render(request, magicauth_settings.LOGIN_VIEW_TEMPLATE, context)
 

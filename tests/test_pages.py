@@ -192,18 +192,17 @@ def test_template_displays_totp_field_when_2FA_enabled(client):
     magicauth_settings.ENABLE_2FA = True
     response = client.get(reverse("magicauth-login"))
     assert response.status_code == 200
-    print(response.content)
     assert "Entrez le code" in str(response.content)
 
-def test_template_does_not_displays_totp_field_when_2FA_disabled(client):
+
+def test_template_does_not_display_totp_field_when_2FA_disabled(client):
     magicauth_settings.ENABLE_2FA = False
     response = client.get(reverse("magicauth-login"))
     assert response.status_code == 200
-    print(response.content)
     assert "Entrez le code" not in str(response.content)
 
 
-def test_posting_good_totp_and_good_email_success(client):
+def test_posting_good_email_and_good_totp_success(client):
     magicauth_settings.ENABLE_2FA = True
     token = factories.MagicTokenFactory()
     thierry = token.user
@@ -216,7 +215,7 @@ def test_posting_good_totp_and_good_email_success(client):
     assert len(mail.outbox) == 1
 
 
-def test_posting_wong_otp_and_good_email_error(client):
+def test_posting_good_email_and_wrong_otp_error(client):
     magicauth_settings.ENABLE_2FA = True
     token = factories.MagicTokenFactory()
     thierry = token.user
@@ -227,4 +226,18 @@ def test_posting_wong_otp_and_good_email_error(client):
     response = client.post(url, data=data)
     assert response.status_code == 200
     assert "pas valide." in str(response.content)
+    assert len(mail.outbox) == 0
+
+
+def test_posting_wrong_email_and_wrong_otp_error(client):
+    magicauth_settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device = thierry.staticdevice_set.create()
+    device.token_set.create(token="123456")
+    data = {"email": "unknown@email.com", "otp_token": "567654"}
+    url = reverse("magicauth-login")
+    response = client.post(url, data=data)
+    assert response.status_code == 200
+    assert "invalid" in str(response.content)
     assert len(mail.outbox) == 0
