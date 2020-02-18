@@ -78,6 +78,7 @@ class OTPForm(forms.Form):
     def clean_otp_token(self):
         otp_token = self.cleaned_data["otp_token"]
         user = self.user
+
         from django_otp import user_has_device, devices_for_user
         if not user_has_device(user):
             raise ValidationError("Vous n'avez pas d'appareil enregistré")
@@ -87,4 +88,5 @@ class OTPForm(forms.Form):
                 raise ValidationError("Vous devez patienter avant de recommencer")
             if device.verify_token(otp_token):
                 return otp_token
+    
         raise ValidationError("Ce code n'est pas valide.")
