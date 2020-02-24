@@ -4,6 +4,7 @@ from pytest import mark
 from django.core import mail
 from django.shortcuts import reverse
 from django.utils import timezone
+
 from magicauth.models import MagicToken
 from tests import factories
 
@@ -26,6 +27,7 @@ def test_getting_LoginView_while_authenticated_with_next_redirects_to_next(clien
     response = client.get(url)
     assert response.status_code == 302
     assert response.url == "/test_dashboard/"
+
 
 def test_posting_email_for_valid_existing_user_redirects(client):
     user = factories.UserFactory()
@@ -112,6 +114,29 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     response = client.get(url)
     assert response.status_code == 302
     assert response.url == "/test_dashboard/?a=test&b=test"
+
+
+def test_opening_magic_link_with_a_unsafe_next_sets_triggers_404(client):
+    token = factories.MagicTokenFactory()
+    url = (
+        reverse("magicauth-validate-token", kwargs={"key": token.key})
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+def test_opening_magic_link_with_a_unsafe_next_while_loggedin_sets_triggers_404(client):
+    token = factories.MagicTokenFactory()
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = (
+        reverse("magicauth-validate-token", kwargs={"key": token.key})
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+    assert user.is_authenticated == True
 
 
 def test_token_is_removed_after_visiting_magic_link(client):

@@ -1,15 +1,21 @@
 import re
+import logging
 from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import login
+from django.http import HttpResponseNotFound
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.http import is_safe_url
 from django.views.generic import View, FormView, TemplateView
+
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
 from magicauth import settings as magicauth_settings
 
+logger = logging.getLogger()
 
 class LoginView(FormView):
     """
@@ -84,6 +90,12 @@ class ValidateTokenView(View):
         next_view = rule_for_redirect.match(full_path)
         redirect_default = reverse_lazy(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
         url = next_view.group(2) if next_view else redirect_default
+
+        # the following `is_safe_url` will be deprecated in django 4 and replaced by url_has_allowed_host_and_scheme
+        if not is_safe_url(url, allowed_hosts={request.get_host()}, require_https=True):
+            # We are not logging the unsafe URL to prevent code injections in logs
+            logger.warning("[MagicAuth] an unsafe URL was used through a login link")
+            return HttpResponseNotFound()
 
         if request.user.is_authenticated:
             return redirect(url)
