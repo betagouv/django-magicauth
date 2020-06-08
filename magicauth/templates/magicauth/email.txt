@@ -2,6 +2,8 @@ Bonjour {{ user.first_name }} {{ user.last_name }},
 
 Pour accéder à {{ site.domain }}, vous avez juste à cliquer sur ce lien de connexion:  https://{{ site.domain }}{% url 'magicauth-validate-token' token.key %}?next={{ next_view }}
 
+Ce lien n'est valable que {{ TOKEN_DURATION_MINUTES }} minutes. Il est à usage unique.
+
 Bonne journée,
 
 L'équipe de {{ site.domain }}

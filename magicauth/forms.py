@@ -5,7 +5,7 @@ from django.template import loader
 from django.utils.module_loading import import_string
 from magicauth import settings as magicauth_settings
 from magicauth.models import MagicToken
-
+import math
 
 email_unknown_callback = import_string(magicauth_settings.EMAIL_UNKNOWN_CALLBACK)
 
@@ -42,6 +42,8 @@ class EmailForm(forms.Form):
             "user": user,
             "site": current_site,
             "next_view": next_view,
+            "TOKEN_DURATION_MINUTES": math.floor(magicauth_settings.TOKEN_DURATION_SECONDS / 60),
+            "TOKEN_DURATION_SECONDS": magicauth_settings.TOKEN_DURATION_SECONDS,
         }
         text_message = loader.render_to_string(text_template, context)
         html_message = loader.render_to_string(html_template, context)
