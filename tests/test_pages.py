@@ -61,7 +61,6 @@ def test_posting_email_for_valid_existing_user_sends_email(client):
     data = {"email": user.email}
     client.post(url, data=data)
     assert len(mail.outbox) == 1
-    assert "?next=/landing/" in mail.outbox[0].body
 
 
 def test_posting_email_redirect_to_default_view(client):
