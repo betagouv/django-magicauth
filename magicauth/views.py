@@ -79,9 +79,9 @@ class EmailSentView(NextUrlMixin, TemplateView):
 
 class WaitView(NextUrlMixin, TemplateView):
     """
-    The view shows few seconds of wait, and then the user is redirected to login.
-    This is for solving an issue where antispam mail clients visit links in email to check them, and thus invalidate
-    our token.
+    Wait few seconds before redirecting to login.
+    This is for solving an issue with a security feature in some email clients where
+    the magic link is verified and and thus the token gets invalidated.
     """
     template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
