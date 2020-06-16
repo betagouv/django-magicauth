@@ -47,8 +47,8 @@ urlpatterns.extend(magicauth_urls)
 3. Add the following items in your project's settings.py`
 
 ```
-MAGICAUTH_FROM_EMAIL=e.g. 'contact@mysite.com'
-MAGICAUTH_LOGGED_IN_REDIRECT_URL_NAME=e.g. 'home'
+MAGICAUTH_FROM_EMAIL = 'contact@mysite.com'
+MAGICAUTH_LOGGED_IN_REDIRECT_URL_NAME = 'home'
 ```
 
 4. Run `python manage.py migrate` to create the polls models.
@@ -69,18 +69,34 @@ MIDDLEWARE = [
 ```
 ## Contribute to Magic auth
 
-To contribute to magicauth, you can install the package in the "editable" mode 
+To contribute to magicauth, you can install the package in the "editable" mode
+
 ```
 pip uninstall django-magicauth  # just in case...
 pip install -e git+https://github.com/betagouv/django-magicauth.git#egg=django-magicauth
 ```
-You can also install a specific branch, for instance for testing a PR. To install branch `my-branch` : 
+
+You can also install a specific branch, for instance for testing a PR. To install branch `my-branch` :
+
 ```
 pip install -e git+https://github.com/betagouv/django-magicauth.git@my-branch#egg=django-magicauth
 ```
 
+Django-magicauth is now a dependency for your project, and you can editable the code located here:
+
+```
+cd src/django-magicauth
+```
 
 ### run tests
+
+Create a virtual env for the project or reuse one and source it.
+
+Install dependencies and run `tox`
+
+
 ```
-DJANGO_SETTINGS_MODULE=magicauth.tests.settings pytest
+cd src/django-magicauth
+pip install -r requirements.txt
+tox
 ```
