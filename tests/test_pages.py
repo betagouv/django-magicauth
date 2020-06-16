@@ -29,7 +29,7 @@ def test_loging_with_email_is_case_insensitive(client):
     assert len(mail.outbox) == 1
 
 
-def test_posting_unknown_email_raise_error(client):
+def test_posting_unknown_email_raise_error_and_dont_send_email(client):
     url = reverse("magicauth-login")
     data = {"email": "unknown@email.com"}
     response = client.post(url, data=data)
