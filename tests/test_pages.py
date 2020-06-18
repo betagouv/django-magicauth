@@ -163,7 +163,17 @@ def test_expired_token_is_deleted(client):
     client.get(url)
     assert token not in MagicToken.objects.all()
 
+
 def test_sent_page_contains_next_redirect_url(client):
     url = reverse("magicauth-email-sent")
     response = client.get(url, data={'next': "/test_dashboard"})
     assert "?next=/test_dashboard" in str(response.content)
+
+
+def test_wait_page_contains_redirect_url_needed_for_validating_token(client):
+    token = factories.MagicTokenFactory()
+    url = reverse("magicauth-wait", args=[token.key])
+    response = client.get(url)
+    assert response.status_code == 200
+    url_to_check = reverse("magicauth-validate-token", args=[token.key])
+    assert url_to_check in str(response.content)
