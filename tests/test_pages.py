@@ -29,7 +29,7 @@ def test_loging_with_email_is_case_insensitive(client):
     assert len(mail.outbox) == 1
 
 
-def test_posting_unknown_email_raise_error(client):
+def test_posting_unknown_email_raise_error_and_dont_send_email(client):
     url = reverse("magicauth-login")
     data = {"email": "unknown@email.com"}
     response = client.post(url, data=data)
@@ -61,7 +61,6 @@ def test_posting_email_for_valid_existing_user_sends_email(client):
     data = {"email": user.email}
     client.post(url, data=data)
     assert len(mail.outbox) == 1
-    assert "?next=/landing/" in mail.outbox[0].body
 
 
 def test_posting_email_redirect_to_default_view(client):
@@ -164,7 +163,17 @@ def test_expired_token_is_deleted(client):
     client.get(url)
     assert token not in MagicToken.objects.all()
 
+
 def test_sent_page_contains_next_redirect_url(client):
     url = reverse("magicauth-email-sent")
     response = client.get(url, data={'next': "/test_dashboard"})
     assert "?next=/test_dashboard" in str(response.content)
+
+
+def test_wait_page_contains_redirect_url_needed_for_validating_token(client):
+    token = factories.MagicTokenFactory()
+    url = reverse("magicauth-wait", args=[token.key])
+    response = client.get(url)
+    assert response.status_code == 200
+    url_to_check = reverse("magicauth-validate-token", args=[token.key])
+    assert url_to_check in str(response.content)
