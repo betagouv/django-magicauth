@@ -21,7 +21,7 @@
           <h1>Un email vous a été envoyé pour vous connecter.</h1>
           <div class="mb-6">Si vous ne le recevez pas, vous pouvez réessayer.</div>
           <div>
-            <a href="{% url 'magicauth-login' %}?next={{ next_url }}" class="btn btn-secondary">Réessayer</a>
+            <a href="{% url 'magicauth-login' %}?next={{ next_url|urlencode }}" class="btn btn-secondary">Réessayer</a>
           </div>
         </div>
       </div>

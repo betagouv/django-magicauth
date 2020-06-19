@@ -16,6 +16,7 @@ from magicauth.models import MagicToken
 
 logger = logging.getLogger()
 
+
 class NextUrlMixin(object):
     """
     Helper for managing the 'next url' parameter.
@@ -34,7 +35,7 @@ class NextUrlMixin(object):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         next_url = self.get_next_url(self.request)
-        context["next_url"] = urllib.parse.quote(next_url)
+        context["next_url"] = next_url
         return context
 
 
@@ -63,13 +64,14 @@ class LoginView(NextUrlMixin, FormView):
 
     def get_success_url(self, **kwargs):
         url = reverse_lazy("magicauth-email-sent")
-        next_url = self.get_next_url(self.request)
-        next_url = urllib.parse.quote(next_url)
+        # We need to quote next url because we are doing a redirect.
+        next_url = urllib.parse.quote(
+            self.get_next_url(self.request)
+        )
         return f"{url}?next={next_url}"
 
     def form_valid(self, form, *args, **kwargs):
         next_url = self.get_next_url(self.request)
-        next_url = urllib.parse.quote(next_url)
         current_site = self.request.site
         form.send_email(current_site, next_url)
         return super().form_valid(form)
@@ -93,10 +95,8 @@ class WaitView(NextUrlMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        next_url = context["next_url"]
         validate_token_url = reverse('magicauth-validate-token', kwargs={ 'key': token_key })
-        url = f"{validate_token_url}?next={next_url}"
-        context["url"] = url
+        context["validate_token_url"] = validate_token_url
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
         return context
 
