@@ -11,6 +11,23 @@ from tests import factories
 pytestmark = mark.django_db
 
 
+def test_getting_LoginView_while_authenticated_redirects_to_default(client):
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = reverse("magicauth-login")
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url == "/landing/"
+
+
+def test_getting_LoginView_while_authenticated_with_next_redirects_to_next(client):
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = reverse("magicauth-login") + "?next=/test_dashboard/"
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url == "/test_dashboard/"
+
 def test_posting_email_for_valid_existing_user_redirects(client):
     user = factories.UserFactory()
     url = reverse("magicauth-login")
@@ -116,6 +133,29 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     assert response.url == next_url_raw
 
 
+def test_opening_magic_link_with_a_unsafe_next_sets_triggers_404(client):
+    token = factories.MagicTokenFactory()
+    url = (
+        reverse("magicauth-validate-token", kwargs={"key": token.key})
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+def test_opening_magic_link_with_a_unsafe_next_while_loggedin_sets_triggers_404(client):
+    token = factories.MagicTokenFactory()
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = (
+        reverse("magicauth-validate-token", kwargs={"key": token.key})
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+    assert user.is_authenticated == True
+
+
 def test_token_is_removed_after_visiting_magic_link(client):
     token = factories.MagicTokenFactory()
     url = reverse("magicauth-validate-token", args=[token.key])
@@ -162,18 +202,3 @@ def test_expired_token_is_deleted(client):
     url = reverse("magicauth-validate-token", args=[token.key])
     client.get(url)
     assert token not in MagicToken.objects.all()
-
-
-def test_sent_page_contains_next_redirect_url(client):
-    url = reverse("magicauth-email-sent")
-    response = client.get(url, data={'next': "/test_dashboard"})
-    assert "?next=/test_dashboard" in str(response.content)
-
-
-def test_wait_page_contains_redirect_url_needed_for_validating_token(client):
-    token = factories.MagicTokenFactory()
-    url = reverse("magicauth-wait", args=[token.key])
-    response = client.get(url)
-    assert response.status_code == 200
-    url_to_check = reverse("magicauth-validate-token", args=[token.key])
-    assert url_to_check in str(response.content)
