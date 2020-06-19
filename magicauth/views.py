@@ -64,11 +64,11 @@ class LoginView(NextUrlMixin, FormView):
 
     def get_success_url(self, **kwargs):
         url = reverse_lazy("magicauth-email-sent")
-        # We need to quote next url because we are doing a redirect.
-        next_url = urllib.parse.quote(
+        # We quote next url because it's included in a string that will be used for redirecting.
+        next_url_quoted = urllib.parse.quote(
             self.get_next_url(self.request)
         )
-        return f"{url}?next={next_url}"
+        return f"{url}?next={next_url_quoted}"
 
     def form_valid(self, form, *args, **kwargs):
         next_url = self.get_next_url(self.request)
@@ -125,7 +125,7 @@ class ValidateTokenView(NextUrlMixin, View):
 
     def get(self, request, *args, **kwargs):
         url = self.get_next_url(request)
-	    # the following `is_safe_url` will be deprecated in django 4 and replaced by url_has_allowed_host_and_scheme
+        # the following `is_safe_url` will be deprecated in django 4 and replaced by url_has_allowed_host_and_scheme
         if not is_safe_url(url, allowed_hosts={request.get_host()}, require_https=True):
             # We are not logging the unsafe URL to prevent code injections in logs
             logger.warning("[MagicAuth] an unsafe URL was used through a login link")
