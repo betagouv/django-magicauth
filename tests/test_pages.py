@@ -133,7 +133,7 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     assert response.url == next_url_raw
 
 
-def test_opening_magic_link_with_a_unsafe_next_sets_triggers_404(client):
+def test_login_page_raises_404_if_unsafe_next_url(client):
     token = factories.MagicTokenFactory()
     url = (
         reverse("magicauth-validate-token", kwargs={"key": token.key})
@@ -143,7 +143,17 @@ def test_opening_magic_link_with_a_unsafe_next_sets_triggers_404(client):
     assert response.status_code == 404
 
 
-def test_opening_magic_link_with_a_unsafe_next_while_loggedin_sets_triggers_404(client):
+def test_validate_token_view_raises_404_if_unsafe_next_url(client):
+    token = factories.MagicTokenFactory()
+    url = (
+        reverse("magicauth-validate-token", kwargs={"key": token.key})
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+def test_validate_token_view_raises_404_for_loggedin_user_if_unsafe_next_url(client):
     token = factories.MagicTokenFactory()
     user = factories.UserFactory()
     client.force_login(user)
@@ -154,6 +164,26 @@ def test_opening_magic_link_with_a_unsafe_next_while_loggedin_sets_triggers_404(
     response = client.get(url)
     assert response.status_code == 404
     assert user.is_authenticated == True
+
+
+def test_wait_page_raises_404_if_unsafe_next_url(client):
+    token = factories.MagicTokenFactory()
+    url = (
+        reverse("magicauth-wait", kwargs={"key": token.key})
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+def test_email_sent_page_raises_404_if_unsafe_next_url(client):
+    token = factories.MagicTokenFactory()
+    url = (
+        reverse("magicauth-email-sent")
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
 
 
 def test_token_is_removed_after_visiting_magic_link(client):
