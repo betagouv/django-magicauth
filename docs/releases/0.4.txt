@@ -1,0 +1,8 @@
+====================
+Django MagicAuth 0.4
+====================
+
+- Token duration is now available to be displayed in email.
+- Add a "waiting" page to avoid that some email client invalidate the token.
+- Refactor the next URL encoding.
+- Security: Change the way we check for invalid next URL.
