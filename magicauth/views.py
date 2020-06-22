@@ -39,6 +39,14 @@ class NextUrlMixin(object):
             raise Http404
         return next_url
 
+    def get_next_url_encoded(self, request):
+        """
+        Use this when the URL needs to be encoded, for instance when including the URL to string
+        before a redirect.
+        """
+        url = self.get_next_url(self.request)
+        return urllib.parse.quote(url)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         next_url = self.get_next_url(self.request)
@@ -71,10 +79,8 @@ class LoginView(NextUrlMixin, FormView):
 
     def get_success_url(self, **kwargs):
         url = reverse_lazy("magicauth-email-sent")
-        # We quote next url because it's included in a string that will be used for redirecting.
-        next_url_quoted = urllib.parse.quote(
-            self.get_next_url(self.request)
-        )
+        # Use encoded next URL before including it in a string
+        next_url_quoted = self.get_next_url_encoded(self.request)
         return f"{url}?next={next_url_quoted}"
 
     def form_valid(self, form, *args, **kwargs):
