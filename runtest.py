@@ -11,4 +11,3 @@ if __name__ == "__main__":
     django.setup()
     failures = pytest.main()
     sys.exit(bool(failures))
-

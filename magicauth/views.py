@@ -102,7 +102,7 @@ class WaitView(NextUrlMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        validate_token_url = reverse('magicauth-validate-token', kwargs={ 'key': token_key })
+        validate_token_url = reverse('magicauth-validate-token', kwargs={'key': token_key})
         context["validate_token_url"] = validate_token_url
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
         return context

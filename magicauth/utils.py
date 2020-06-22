@@ -1,9 +1,8 @@
-from django import forms
-from django.urls import reverse_lazy
-
 import binascii
 import os
-import re
+
+
+from django import forms
 
 from . import settings as magicauth_settings
 
