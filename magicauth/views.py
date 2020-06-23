@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.http import is_safe_url
-from django.views.generic import View, TemplateView
+from django.views.generic import View, FormView, TemplateView
 
 from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm, OTPForm
@@ -67,12 +67,6 @@ class LoginView(NextUrlMixin, FormView):
         if request.user.is_authenticated:
             next_url = self.get_next_url(self.request)
             return redirect(next_url)
-        # context = {
-        #     "email_form": EmailForm,
-        #     "OTP_enabled": magicauth_settings.ENABLE_2FA,
-        #     "OTP_form": OTPForm(request.user),
-        # }
-        # return render(request, magicauth_settings.LOGIN_VIEW_TEMPLATE, context)
         return super(LoginView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -81,6 +75,9 @@ class LoginView(NextUrlMixin, FormView):
             "LOGGED_IN_REDIRECT_URL_NAME"
         ] = magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
+        context["OTP_enabled"] = magicauth_settings.ENABLE_2FA
+        # context["OTP_form"] = OTPForm(request.user)
+        print("get_context_data", context)
         return context
 
     def get_success_url(self, **kwargs):
@@ -95,32 +92,32 @@ class LoginView(NextUrlMixin, FormView):
         form.send_email(current_site, next_url)
         return super().form_valid(form)
 
-    def post(self, request):
-        next_url = self.get_next_url(self.request)
-        current_site = request.site
-        email_form = EmailForm(request.POST)
-        OTP_form = OTPForm(request.user)
+    # def post(self, request):
+    #     next_url = self.get_next_url(self.request)
+    #     current_site = request.site
+    #     email_form = EmailForm(request.POST)
+    #     OTP_form = OTPForm(request.user)
 
-        if email_form.is_valid() and not magicauth_settings.ENABLE_2FA:
-            email_form.send_email(current_site, next_view)
-            return redirect(reverse_lazy("magicauth-email-sent"))
+    #     if email_form.is_valid() and not magicauth_settings.ENABLE_2FA:
+    #         email_form.send_email(current_site, next_url)
+    #         return redirect(reverse_lazy("magicauth-email-sent"))
 
-        elif email_form.is_valid() and magicauth_settings.ENABLE_2FA:
-            data = email_form.cleaned_data
-            email = data["email"]
-            user = get_user_model().objects.get(email=email)
+    #     elif email_form.is_valid() and magicauth_settings.ENABLE_2FA:
+    #         data = email_form.cleaned_data
+    #         email = data["email"]
+    #         user = get_user_model().objects.get(email=email)
 
-            OTP_form = OTPForm(user=user, data=request.POST)
-            if OTP_form.is_valid():
-                email_form.send_email(current_site, next_view)
-                return redirect(reverse_lazy("magicauth-email-sent"))
+    #         OTP_form = OTPForm(user=user, data=request.POST)
+    #         if OTP_form.is_valid():
+    #             email_form.send_email(current_site, next_url)
+    #             return redirect(reverse_lazy("magicauth-email-sent"))
 
-        context = {
-            "email_form": email_form,
-            "OTP_enabled": magicauth_settings.ENABLE_2FA,
-            "OTP_form": OTP_form,
-        }
-        return render(request, magicauth_settings.LOGIN_VIEW_TEMPLATE, context)
+    #     context = {
+    #         "email_form": email_form,
+    #         "OTP_enabled": magicauth_settings.ENABLE_2FA,
+    #         "OTP_form": OTP_form,
+    #     }
+    #     return render(request, magicauth_settings.LOGIN_VIEW_TEMPLATE, context)
 
 
 class EmailSentView(NextUrlMixin, TemplateView):
