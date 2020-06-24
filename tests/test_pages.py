@@ -127,6 +127,7 @@ def test_posting_unknown_email_does_not_send_email(client):
     assert len(mail.outbox) == 0
 
 
+# Step 2.5 : email-sent page
 def test_email_sent_page_raises_404_if_unsafe_next_url(client):
     url = (
         reverse("magicauth-email-sent")
@@ -183,14 +184,21 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     assert response.url == next_url_raw
 
 
-def test_validate_token_view_raises_404_if_unsafe_next_url(client):
+def test_validate_token_view_with_unsafe_next_does_not_log_in(client):
+    token = factories.MagicTokenFactory()
+    next_url = 'http://www.myfishingsite.com/?a=test&b=test'
+    response = open_magic_link(client, token, next_url)
+    assert "_auth_user_id" not in client.session
+
+
+def test_validate_token_view_with_unsafe_next_raises_404(client):
     token = factories.MagicTokenFactory()
     next_url = 'http://www.myfishingsite.com/?a=test&b=test'
     response = open_magic_link(client, token, next_url)
     assert response.status_code == 404
 
 
-def test_validate_token_view_raises_404_for_loggedin_user_if_unsafe_next_url(client):
+def test_validate_token_view_with_unsafe_next_raises_404_for_loggedin_user(client):
     token = factories.MagicTokenFactory()
     user = factories.UserFactory()
     client.force_login(user)
