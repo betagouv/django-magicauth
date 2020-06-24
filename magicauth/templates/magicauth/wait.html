@@ -9,7 +9,7 @@
     }
   </style>
   <script>
-    var url = '{{ validate_token_url }}?next=' + '{{ next_url|urlencode}}'
+    var url = '{{ next_step_url }}'
     var waitSeconds = {{ WAIT_SECONDS }}
 
     console.debug('Redirecting to', url, 'in', waitSeconds, 'seconds')

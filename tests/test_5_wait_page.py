@@ -1,10 +1,23 @@
 from pytest import mark
+import urllib.parse
 
 from django.shortcuts import reverse
+from magicauth import settings
 from tests import factories
 
 
 pytestmark = mark.django_db
+
+
+# Note : We do not test that the javascript actually does the redirect.
+
+
+def open_magic_link_with_wait(client, token, next=None):
+    url = reverse("magicauth-wait", kwargs={"key": token.key})
+    if next:
+        # Encode the url (with urllib.parse.quote) otherwise URL params get lost.
+        url += '?next=' + urllib.parse.quote(next)
+    return client.get(url)
 
 
 def test_wait_page_raises_loads(client):
@@ -13,9 +26,38 @@ def test_wait_page_raises_loads(client):
     assert response.status_code == 200
 
 
+def test_wait_page_will_redirect_to_validate_token(client):
+    token = factories.MagicTokenFactory()
+    response = open_magic_link_with_wait(client, token)
+
+    redirect_url = reverse('magicauth-validate-token', kwargs={"key": token.key})
+    assert redirect_url in response.context_data['next_step_url']
+
+
+def test_wait_page_will_redirect_with_next_param(client):
+    token = factories.MagicTokenFactory()
+    response = open_magic_link_with_wait(client, token, '/test_dashboard/')
+
+    assert 'next=/test_dashboard/' in response.context_data['next_step_url']
+
+
+def test_wait_page_will_redirect_with_default_next_param(client):
+    token = factories.MagicTokenFactory()
+    response = open_magic_link_with_wait(client, token)
+
+    assert 'next=/landing/' in response.context_data['next_step_url']
+
+
+def test_wait_page_will_redirect_in_WAIT_SECONDS(client):
+    token = factories.MagicTokenFactory()
+    response = open_magic_link_with_wait(client, token)
+
+    assert response.context_data['WAIT_SECONDS'] == settings.WAIT_SECONDS
+
+
 def test_wait_page_raises_404_if_unsafe_next_url(client):
     token = factories.MagicTokenFactory()
-    url = reverse("magicauth-wait", kwargs={"key": token.key})
-    url += "?next=http://www.myfishingsite.com/"
-    response = client.get(url)
+    response = open_magic_link_with_wait(
+        client, token, 'http://www.myfishingsite.com/')
+
     assert response.status_code == 404
