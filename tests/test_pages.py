@@ -117,6 +117,12 @@ def open_magic_link(client, token, next=None):
     return client.get(url)
 
 
+def test_opening_magic_link_triggers_login(client):
+    token = factories.MagicTokenFactory()
+    response = open_magic_link(client, token)
+    assert "_auth_user_id" in client.session
+
+
 def test_opening_magic_link_with_valid_token_redirects(client):
     token = factories.MagicTokenFactory()
     response = open_magic_link(client, token)
@@ -171,16 +177,11 @@ def test_duplicate_token_for_same_user_is_removed_after_visiting_magic_link(clie
     assert duplicate not in MagicToken.objects.all()
 
 
-def test_visiting_magic_link_triggers_login(client):
-    token = factories.MagicTokenFactory()
-    open_magic_link(client, token)
-    assert "_auth_user_id" in client.session
-
-
-def test_unknown_token_redirects(client): # todo sert à quoi?
+def test_unknown_token_redirects_to_login(client):
     url = reverse("magicauth-validate-token", args=["unknown-token"])
     response = client.get(url)
     assert response.status_code == 302
+    assert response.url == '/login/'
 
 
 def test_unknown_token_does_not_login(client):
@@ -196,10 +197,11 @@ def create_expired_token():
     return token
 
 
-def test_expired_token_redirects(client): # todo sert à quoi?
+def test_expired_token_redirects_to_login(client):
     token = create_expired_token()
     response = open_magic_link(client, token)
     assert response.status_code == 302
+    assert response.url == '/login/'
 
 
 def test_expired_token_is_deleted(client):
