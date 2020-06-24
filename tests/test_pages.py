@@ -14,7 +14,12 @@ pytestmark = mark.django_db
 #########################
 # Step 1 : GET LoginView
 #########################
-#todo def test_unauthenticated_user_is_not_redirected
+def test_unauthenticated_user_accesses_login_page(client):
+    user = factories.UserFactory()
+    url = reverse("magicauth-login")
+    response = client.get(url)
+    assert response.status_code == 200
+
 
 def test_authenticated_user_is_redirected_to_default_redirect_page(client):
     user = factories.UserFactory()
