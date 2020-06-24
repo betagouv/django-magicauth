@@ -6,6 +6,7 @@ from django.core import mail
 from django.shortcuts import reverse
 from django.utils import timezone
 from magicauth.models import MagicToken
+from magicauth import settings
 from tests import factories
 
 pytestmark = mark.django_db
@@ -193,7 +194,7 @@ def test_expired_token_redirects(client): # todo sert à quoi?
 
 def test_expired_token_is_deleted(client):
     token = factories.MagicTokenFactory()
-    token.created = timezone.now() - timedelta(days=1) #todo no hard-code
+    token.created = timezone.now() - timedelta(seconds=(settings.TOKEN_DURATION_SECONDS * 2))
     token.save()
     open_magic_link(client, token)
     assert token not in MagicToken.objects.all()
