@@ -102,13 +102,23 @@ def test_email_sent_page_raises_404_if_unsafe_next_url(client):
     assert response.status_code == 404
 
 
-################################################################################
-# Step 3, option 1 : click (GET) the link received by email, without wait page
-################################################################################
+###################################################
+# Step 3 : click (GET) the link received by email
+###################################################
+
+# Option A : no wait page
+
+def open_magic_link(client, token, next=None):
+    url = reverse("magicauth-validate-token", args=[token.key])
+    # todo do we need to quote urls with params?
+    if next:
+        url += '?next=' + urllib.parse.quote(next)
+    return client.get(url)
+
+
 def test_opening_magic_link_with_valid_token_redirects(client):
     token = factories.MagicTokenFactory()
-    url = reverse("magicauth-validate-token", args=[token.key])
-    response = client.get(url)
+    response = open_magic_link(client, token)
     assert response.status_code == 302
     assert response.url == "/landing/"
 
@@ -116,32 +126,22 @@ def test_opening_magic_link_with_valid_token_redirects(client):
 def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     token = factories.MagicTokenFactory()
     next_url_raw = "/test_dashboard/?a=test&b=test"
-    # We use `quote` because the URL has parameters:
-    next_url = urllib.parse.quote(next_url_raw)  # todo on encode ou pas ?
-    validate_token_url = reverse("magicauth-validate-token", kwargs={"key": token.key})
-    url = f'{validate_token_url}?next={next_url}'
-    response = client.get(url)
+    response = open_magic_link(client, token, next_url_raw)
     assert response.status_code == 302
     assert response.url == next_url_raw
 
 
 def test_login_page_raises_404_if_unsafe_next_url(client):
     token = factories.MagicTokenFactory()
-    url = (
-        reverse("magicauth-validate-token", kwargs={"key": token.key})
-        + "?next=http://www.myfishingsite.com/?a=test&b=test"
-    )
-    response = client.get(url)
+    next_url = 'http://www.myfishingsite.com/?a=test&b=test'
+    response = open_magic_link(client, token, next_url)
     assert response.status_code == 404
 
 
 def test_validate_token_view_raises_404_if_unsafe_next_url(client):
     token = factories.MagicTokenFactory()
-    url = (
-        reverse("magicauth-validate-token", kwargs={"key": token.key})
-        + "?next=http://www.myfishingsite.com/?a=test&b=test"
-    )
-    response = client.get(url)
+    next_url = 'http://www.myfishingsite.com/?a=test&b=test'
+    response = open_magic_link(client, token, next_url)
     assert response.status_code == 404
 
 
@@ -149,20 +149,16 @@ def test_validate_token_view_raises_404_for_loggedin_user_if_unsafe_next_url(cli
     token = factories.MagicTokenFactory()
     user = factories.UserFactory()
     client.force_login(user)
-    url = (
-        reverse("magicauth-validate-token", kwargs={"key": token.key})
-        + "?next=http://www.myfishingsite.com/?a=test&b=test"
-    )
-    response = client.get(url)
+    next_url = 'http://www.myfishingsite.com/?a=test&b=test'
+    response = open_magic_link(client, token, next_url)
     assert response.status_code == 404
     assert user.is_authenticated
 
 
 def test_token_is_removed_after_visiting_magic_link(client):
     token = factories.MagicTokenFactory()
-    url = reverse("magicauth-validate-token", args=[token.key])
     count_before = MagicToken.objects.count()
-    client.get(url)
+    open_magic_link(client, token)
     count_after = MagicToken.objects.count()
     assert count_after == count_before - 1
 
@@ -170,21 +166,19 @@ def test_token_is_removed_after_visiting_magic_link(client):
 def test_duplicate_token_for_same_user_is_removed_after_visiting_magic_link(client):
     token = factories.MagicTokenFactory()
     duplicate = factories.MagicTokenFactory(user=token.user)
-    url = reverse("magicauth-validate-token", args=[token.key])
-    client.get(url)
+    open_magic_link(client, token)
     assert duplicate not in MagicToken.objects.all()
 
 
 def test_visiting_magic_link_triggers_login(client):
     token = factories.MagicTokenFactory()
-    url = reverse("magicauth-validate-token", args=[token.key])
-    client.get(url)
+    open_magic_link(client, token)
     assert "_auth_user_id" in client.session
 
 
 def test_unknown_token_redirects(client): # todo sert à quoi?
     url = reverse("magicauth-validate-token", args=["unknown-token"])
-    response = client.get(url)
+    return client.get(url)
     assert response.status_code == 302
 
 #def test_unknown_token_does_not_login(client) todo
@@ -193,8 +187,7 @@ def test_expired_token_redirects(client): # todo sert à quoi?
     token = factories.MagicTokenFactory()
     token.created = timezone.now() - timedelta(days=1)
     token.save()
-    url = reverse("magicauth-validate-token", args=[token.key])
-    response = client.get(url)
+    response = open_magic_link(client, token)
     assert response.status_code == 302
 
 
@@ -202,16 +195,14 @@ def test_expired_token_is_deleted(client):
     token = factories.MagicTokenFactory()
     token.created = timezone.now() - timedelta(days=1) #todo no hard-code
     token.save()
-    url = reverse("magicauth-validate-token", args=[token.key])
-    client.get(url)
+    open_magic_link(client, token)
     assert token not in MagicToken.objects.all()
 
 #def test_expired_token_does_not_login(client) todo
 
 
-#############################################################################
-# Step 3, option 2 : click (GET) the link received by email, with wait page
-#############################################################################
+# Option B : with wait page
+
 def test_wait_page_raises_404_if_unsafe_next_url(client):
     token = factories.MagicTokenFactory()
     url = (
@@ -220,8 +211,3 @@ def test_wait_page_raises_404_if_unsafe_next_url(client):
     )
     response = client.get(url)
     assert response.status_code == 404
-
-
-
-
-
