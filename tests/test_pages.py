@@ -125,8 +125,8 @@ def test_email_sent_page_raises_404_if_unsafe_next_url(client):
 
 def open_magic_link(client, token, next=None):
     url = reverse("magicauth-validate-token", args=[token.key])
-    # todo do we need to quote urls with params?
     if next:
+        # Encode the url (with urllib.parse.quote) otherwise URL params get lost.
         url += '?next=' + urllib.parse.quote(next)
     return client.get(url)
 
