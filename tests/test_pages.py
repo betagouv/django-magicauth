@@ -34,6 +34,15 @@ def test_authenticated_user_is_redirected_to_next_url(client):
     assert response.url == "/test_dashboard/"
 
 
+def test_login_page_raises_404_if_unsafe_next_url(client):
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = reverse("magicauth-login")
+    response = client.get(url, {"next": "http://www.myfishingsite.com/?a=test&b=test"})
+
+    assert response.status_code == 404
+
+
 #########################################
 # Step 2 : POST your email to LoginView
 #########################################
@@ -136,13 +145,6 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     response = open_magic_link(client, token, next_url_raw)
     assert response.status_code == 302
     assert response.url == next_url_raw
-
-
-def test_login_page_raises_404_if_unsafe_next_url(client):
-    token = factories.MagicTokenFactory()
-    next_url = 'http://www.myfishingsite.com/?a=test&b=test'
-    response = open_magic_link(client, token, next_url)
-    assert response.status_code == 404
 
 
 def test_validate_token_view_raises_404_if_unsafe_next_url(client):
