@@ -13,23 +13,7 @@ pytestmark = mark.django_db
 #########################
 # Step 1 : GET LoginView
 #########################
-def test_getting_LoginView_while_authenticated_redirects_to_default(client):
-    user = factories.UserFactory()
-    client.force_login(user)
-    url = reverse("magicauth-login")
-    response = client.get(url)
-    assert response.status_code == 302
-    assert response.url == "/landing/"
-
-
-def test_getting_LoginView_while_authenticated_with_next_redirects_to_next(client):
-    user = factories.UserFactory()
-    client.force_login(user)
-    url = reverse("magicauth-login") + "?next=/test_dashboard/"
-    response = client.get(url)
-    assert response.status_code == 302
-    assert response.url == "/test_dashboard/"
-
+#todo def test_unauthenticated_user_is_not_redirected
 
 def test_authenticated_user_is_redirected_to_default_redirect_page(client):
     user = factories.UserFactory()
@@ -52,49 +36,31 @@ def test_authenticated_user_is_redirected_to_next_url(client):
 #########################################
 # Step 2 : POST your email to LoginView
 #########################################
+def post_email(client, email):
+    url = reverse("magicauth-login")
+    data = {"email": email}
+    return client.post(url, data=data)
+
+
 def test_posting_email_for_valid_existing_user_redirects(client):
     user = factories.UserFactory()
-    url = reverse("magicauth-login")
-    data = {"email": user.email}
-    response = client.post(url, data=data)
+    response = post_email(client, user.email)
     assert response.status_code == 302
-    assert len(mail.outbox) == 1
-
-
-def test_loging_with_email_is_case_insensitive(client):
-    user = factories.UserFactory()
-    url = reverse("magicauth-login")
-    data = {"email": user.email.upper()}
-    response = client.post(url, data=data)
-    assert response.status_code == 302
-    assert len(mail.outbox) == 1
-
-
-def test_posting_unknown_email_raise_error_and_dont_send_email(client):
-    url = reverse("magicauth-login")
-    data = {"email": "unknown@email.com"}
-    response = client.post(url, data=data)
-    assert "invalid" in str(response.content)
-    assert len(mail.outbox) == 0
 
 
 def test_posting_email_for_valid_existing_user_sends_email(client):
     user = factories.UserFactory()
-    url = reverse("magicauth-login")
-    data = {"email": user.email}
-    client.post(url, data=data)
+    response = post_email(client, user.email)
     assert len(mail.outbox) == 1
 
 
-def test_posting_email_redirect_to_default_view(client):
+def test_posting_email_sends_email_with_redirection_to_default(client):
     user = factories.UserFactory()
-    url = reverse("magicauth-login")
-    data = {"email": user.email}
-    client.post(url, data=data)
+    post_email(client, user.email)
     assert "?next=/landing/" in mail.outbox[0].body
 
 
-def test_posting_email_with_next_redirects_to_next(client):
+def test_posting_email_sends_email_with_redirection_to_next(client):
     user = factories.UserFactory()
     url = reverse("magicauth-login") + "?next=/test_dashboard/"
     data = {"email": user.email}
@@ -102,21 +68,29 @@ def test_posting_email_with_next_redirects_to_next(client):
     assert "?next=/test_dashboard/" in mail.outbox[0].body
 
 
-def test_posting_unknown_email_does_not_send_email(client):
-    url = reverse("magicauth-login")
-    data = {"email": "unknown@email.com"}
-    client.post(url, data=data)
-    assert len(mail.outbox) == 0
-
-
 def test_posting_email_for_valid_existing_user_created_token(client):
     user = factories.UserFactory()
-    url = reverse("magicauth-login")
-    data = {"email": user.email}
     count_before = MagicToken.objects.count()
-    client.post(url, data=data)
+    post_email(client, user.email)
     count_after = MagicToken.objects.count()
     assert count_after == count_before + 1
+
+
+def test_loging_with_email_is_case_insensitive(client):
+    user = factories.UserFactory()
+    response = post_email(client, user.email.upper())
+    assert response.status_code == 302
+    assert len(mail.outbox) == 1
+
+
+def test_posting_unknown_email_raise_error(client):
+    response = post_email(client, "unknown@email.com")
+    assert "invalid" in str(response.content)
+
+
+def test_posting_unknown_email_does_not_send_email(client):
+    response = post_email(client, "unknown@email.com")
+    assert len(mail.outbox) == 0
 
 
 def test_email_sent_page_raises_404_if_unsafe_next_url(client):
@@ -143,7 +117,7 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     token = factories.MagicTokenFactory()
     next_url_raw = "/test_dashboard/?a=test&b=test"
     # We use `quote` because the URL has parameters:
-    next_url = urllib.parse.quote(next_url_raw)
+    next_url = urllib.parse.quote(next_url_raw)  # todo on encode ou pas ?
     validate_token_url = reverse("magicauth-validate-token", kwargs={"key": token.key})
     url = f'{validate_token_url}?next={next_url}'
     response = client.get(url)
@@ -208,13 +182,14 @@ def test_visiting_magic_link_triggers_login(client):
     assert "_auth_user_id" in client.session
 
 
-def test_unknown_token_redirects(client):
+def test_unknown_token_redirects(client): # todo sert à quoi?
     url = reverse("magicauth-validate-token", args=["unknown-token"])
     response = client.get(url)
     assert response.status_code == 302
 
+#def test_unknown_token_does_not_login(client) todo
 
-def test_expired_token_redirects(client):
+def test_expired_token_redirects(client): # todo sert à quoi?
     token = factories.MagicTokenFactory()
     token.created = timezone.now() - timedelta(days=1)
     token.save()
@@ -225,11 +200,13 @@ def test_expired_token_redirects(client):
 
 def test_expired_token_is_deleted(client):
     token = factories.MagicTokenFactory()
-    token.created = timezone.now() - timedelta(days=1)
+    token.created = timezone.now() - timedelta(days=1) #todo no hard-code
     token.save()
     url = reverse("magicauth-validate-token", args=[token.key])
     client.get(url)
     assert token not in MagicToken.objects.all()
+
+#def test_expired_token_does_not_login(client) todo
 
 
 #############################################################################
