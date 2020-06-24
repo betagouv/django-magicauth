@@ -266,6 +266,13 @@ def test_expired_token_is_deleted_when_valid_token_is_visited(client):
 
 # Option B : with wait page
 
+
+def test_wait_page_raises_loads(client):
+    url = reverse("magicauth-wait", kwargs={"key": 'some-token'})
+    response = client.get(url)
+    assert response.status_code == 200
+
+
 def test_wait_page_raises_404_if_unsafe_next_url(client):
     token = factories.MagicTokenFactory()
     url = reverse("magicauth-wait", kwargs={"key": token.key})
