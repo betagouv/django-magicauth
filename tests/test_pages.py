@@ -182,24 +182,36 @@ def test_unknown_token_redirects(client): # todo sert à quoi?
     response = client.get(url)
     assert response.status_code == 302
 
-#def test_unknown_token_does_not_login(client) todo
+
+def test_unknown_token_does_not_login(client):
+    url = reverse("magicauth-validate-token", args=["unknown-token"])
+    response = client.get(url)
+    assert "_auth_user_id" not in client.session
+
+
+def create_expired_token():
+    token = factories.MagicTokenFactory()
+    token.created = timezone.now() - timedelta(seconds=(settings.TOKEN_DURATION_SECONDS * 2))
+    token.save()
+    return token
+
 
 def test_expired_token_redirects(client): # todo sert à quoi?
-    token = factories.MagicTokenFactory()
-    token.created = timezone.now() - timedelta(days=1)
-    token.save()
+    token = create_expired_token()
     response = open_magic_link(client, token)
     assert response.status_code == 302
 
 
 def test_expired_token_is_deleted(client):
-    token = factories.MagicTokenFactory()
-    token.created = timezone.now() - timedelta(seconds=(settings.TOKEN_DURATION_SECONDS * 2))
-    token.save()
+    token = create_expired_token()
     open_magic_link(client, token)
     assert token not in MagicToken.objects.all()
 
-#def test_expired_token_does_not_login(client) todo
+
+def test_expired_token_does_not_login(client):
+    token = create_expired_token()
+    open_magic_link(client, token)
+    assert "_auth_user_id" not in client.session
 
 
 # Option B : with wait page
