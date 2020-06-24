@@ -10,7 +10,9 @@ from tests import factories
 
 pytestmark = mark.django_db
 
-
+#########################
+# Step 1 : GET LoginView
+#########################
 def test_getting_LoginView_while_authenticated_redirects_to_default(client):
     user = factories.UserFactory()
     client.force_login(user)
@@ -29,6 +31,27 @@ def test_getting_LoginView_while_authenticated_with_next_redirects_to_next(clien
     assert response.url == "/test_dashboard/"
 
 
+def test_authenticated_user_is_redirected_to_default_redirect_page(client):
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = reverse("magicauth-login")
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url == "/landing/"
+
+
+def test_authenticated_user_is_redirected_to_next_url(client):
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = reverse("magicauth-login")
+    response = client.get(url, {"next": "/test_dashboard/"})
+    assert response.status_code == 302
+    assert response.url == "/test_dashboard/"
+
+
+#########################################
+# Step 2 : POST your email to LoginView
+#########################################
 def test_posting_email_for_valid_existing_user_redirects(client):
     user = factories.UserFactory()
     url = reverse("magicauth-login")
@@ -53,24 +76,6 @@ def test_posting_unknown_email_raise_error_and_dont_send_email(client):
     response = client.post(url, data=data)
     assert "invalid" in str(response.content)
     assert len(mail.outbox) == 0
-
-
-def test_authenticated_user_is_redirected_to_default_redirect_page(client):
-    user = factories.UserFactory()
-    client.force_login(user)
-    url = reverse("magicauth-login")
-    response = client.get(url)
-    assert response.status_code == 302
-    assert response.url == "/landing/"
-
-
-def test_authenticated_user_is_redirected_to_next_url(client):
-    user = factories.UserFactory()
-    client.force_login(user)
-    url = reverse("magicauth-login")
-    response = client.get(url, {"next": "/test_dashboard/"})
-    assert response.status_code == 302
-    assert response.url == "/test_dashboard/"
 
 
 def test_posting_email_for_valid_existing_user_sends_email(client):
@@ -114,6 +119,18 @@ def test_posting_email_for_valid_existing_user_created_token(client):
     assert count_after == count_before + 1
 
 
+def test_email_sent_page_raises_404_if_unsafe_next_url(client):
+    url = (
+        reverse("magicauth-email-sent")
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+################################################################################
+# Step 3, option 1 : click (GET) the link received by email, without wait page
+################################################################################
 def test_opening_magic_link_with_valid_token_redirects(client):
     token = factories.MagicTokenFactory()
     url = reverse("magicauth-validate-token", args=[token.key])
@@ -167,25 +184,6 @@ def test_validate_token_view_raises_404_for_loggedin_user_if_unsafe_next_url(cli
     assert user.is_authenticated
 
 
-def test_wait_page_raises_404_if_unsafe_next_url(client):
-    token = factories.MagicTokenFactory()
-    url = (
-        reverse("magicauth-wait", kwargs={"key": token.key})
-        + "?next=http://www.myfishingsite.com/?a=test&b=test"
-    )
-    response = client.get(url)
-    assert response.status_code == 404
-
-
-def test_email_sent_page_raises_404_if_unsafe_next_url(client):
-    url = (
-        reverse("magicauth-email-sent")
-        + "?next=http://www.myfishingsite.com/?a=test&b=test"
-    )
-    response = client.get(url)
-    assert response.status_code == 404
-
-
 def test_token_is_removed_after_visiting_magic_link(client):
     token = factories.MagicTokenFactory()
     url = reverse("magicauth-validate-token", args=[token.key])
@@ -232,3 +230,21 @@ def test_expired_token_is_deleted(client):
     url = reverse("magicauth-validate-token", args=[token.key])
     client.get(url)
     assert token not in MagicToken.objects.all()
+
+
+#############################################################################
+# Step 3, option 2 : click (GET) the link received by email, with wait page
+#############################################################################
+def test_wait_page_raises_404_if_unsafe_next_url(client):
+    token = factories.MagicTokenFactory()
+    url = (
+        reverse("magicauth-wait", kwargs={"key": token.key})
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+
+
+
