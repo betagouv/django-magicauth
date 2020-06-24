@@ -256,10 +256,17 @@ def test_expired_token_redirects_to_login(client):
     assert response.url == '/login/'
 
 
-def test_expired_token_is_deleted_when_link_is_visited(client):
+def test_expired_token_is_deleted_when_visited(client):
     token = create_expired_token()
     open_magic_link(client, token)
     assert token not in MagicToken.objects.all()
+
+
+def test_expired_token_is_deleted_when_valid_token_is_visited(client):
+    expired_token = create_expired_token()
+    valid_token = factories.MagicTokenFactory(user=expired_token.user)
+    open_magic_link(client, valid_token)
+    assert expired_token not in MagicToken.objects.all()
 
 
 # Option B : with wait page
