@@ -41,11 +41,18 @@ def test_authenticated_user_is_redirected_to_next_url(client):
 
 def test_login_page_raises_404_if_unsafe_next_url(client):
     user = factories.UserFactory()
+    url = reverse("magicauth-login")
+    response = client.get(url, {"next": "http://www.myfishingsite.com/?a=test&b=test"})
+    assert response.status_code == 404
+
+
+def test_login_page_raises_404_if_unsafe_next_url_with_authed_user(client):
+    user = factories.UserFactory()
     client.force_login(user)
     url = reverse("magicauth-login")
     response = client.get(url, {"next": "http://www.myfishingsite.com/?a=test&b=test"})
-
     assert response.status_code == 404
+    assert user.is_authenticated
 
 
 #########################################
@@ -83,6 +90,18 @@ def test_posting_email_sends_email_with_redirection_to_next(client):
     assert "?next=/test_dashboard/" in mail.outbox[0].body
 
 
+def test_posting_email_with_usafe_next_does_not_send_email_and_returns_404(client):
+    user = factories.UserFactory()
+    url = (
+        reverse("magicauth-login")
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    data = {"email": user.email}
+    response = client.post(url, data=data)
+    assert len(mail.outbox) == 0
+    assert response.status_code == 404
+
+
 def test_posting_email_for_valid_existing_user_created_token(client):
     user = factories.UserFactory()
     count_before = MagicToken.objects.count()
@@ -115,6 +134,18 @@ def test_email_sent_page_raises_404_if_unsafe_next_url(client):
     )
     response = client.get(url)
     assert response.status_code == 404
+
+
+def test_email_sent_page_raises_404_if_unsafe_next_url_with_authed_user(client):
+    user = factories.UserFactory()
+    client.force_login(user)
+    url = (
+        reverse("magicauth-email-sent")
+        + "?next=http://www.myfishingsite.com/?a=test&b=test"
+    )
+    response = client.get(url)
+    assert response.status_code == 404
+    assert user.is_authenticated
 
 
 ###################################################
