@@ -179,7 +179,7 @@ def test_visiting_magic_link_triggers_login(client):
 
 def test_unknown_token_redirects(client): # todo sert à quoi?
     url = reverse("magicauth-validate-token", args=["unknown-token"])
-    return client.get(url)
+    response = client.get(url)
     assert response.status_code == 302
 
 #def test_unknown_token_does_not_login(client) todo
