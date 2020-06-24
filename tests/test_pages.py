@@ -223,17 +223,17 @@ def test_duplicate_token_for_same_user_is_removed_after_visiting_magic_link(clie
     assert duplicate not in MagicToken.objects.all()
 
 
+def test_unknown_token_does_not_login(client):
+    url = reverse("magicauth-validate-token", args=["unknown-token"])
+    response = client.get(url)
+    assert "_auth_user_id" not in client.session
+
+
 def test_unknown_token_redirects_to_login(client):
     url = reverse("magicauth-validate-token", args=["unknown-token"])
     response = client.get(url)
     assert response.status_code == 302
     assert response.url == '/login/'
-
-
-def test_unknown_token_does_not_login(client):
-    url = reverse("magicauth-validate-token", args=["unknown-token"])
-    response = client.get(url)
-    assert "_auth_user_id" not in client.session
 
 
 def create_expired_token():
@@ -243,6 +243,12 @@ def create_expired_token():
     return token
 
 
+def test_expired_token_does_not_login(client):
+    token = create_expired_token()
+    open_magic_link(client, token)
+    assert "_auth_user_id" not in client.session
+
+
 def test_expired_token_redirects_to_login(client):
     token = create_expired_token()
     response = open_magic_link(client, token)
@@ -250,16 +256,10 @@ def test_expired_token_redirects_to_login(client):
     assert response.url == '/login/'
 
 
-def test_expired_token_is_deleted(client):
+def test_expired_token_is_deleted_when_link_is_visited(client):
     token = create_expired_token()
     open_magic_link(client, token)
     assert token not in MagicToken.objects.all()
-
-
-def test_expired_token_does_not_login(client):
-    token = create_expired_token()
-    open_magic_link(client, token)
-    assert "_auth_user_id" not in client.session
 
 
 # Option B : with wait page
