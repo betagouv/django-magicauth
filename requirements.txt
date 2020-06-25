@@ -1,7 +1,7 @@
 django
+pre-commit==2.5.1
 pytest
 pytest-django
 
 flake8
 tox
-

@@ -98,6 +98,11 @@ Django-magicauth is now a dependency of your project, and you can edit the code 
 cd src/django-magicauth
 ```
 
+Also install the _git hooks_:
+```
+pre-commit install
+```
+
 ### run tests
 
 Create a virtual env for the project or reuse one and source it.
