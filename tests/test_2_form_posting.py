@@ -6,7 +6,7 @@ from magicauth.models import MagicToken
 from tests import factories
 
 '''
-Step 2 of login process : POST your email (and optionnally your TOTP) to the login page.
+Step 2 of login process : see doc in magicauth/views.py for step details
 '''
 
 pytestmark = mark.django_db

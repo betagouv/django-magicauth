@@ -4,7 +4,7 @@ from django.shortcuts import reverse
 from tests import factories
 
 '''
-Step 1 of login process : GET the login page.
+Step 1 of login process : see doc in magicauth/views.py for step details
 '''
 
 pytestmark = mark.django_db

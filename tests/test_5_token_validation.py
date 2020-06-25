@@ -9,8 +9,7 @@ from magicauth import settings
 from tests import factories
 
 '''
-Step 5 of login process : you visit the page that validates the token and logs you in.
-Either you clicked a link to this page in your email, or you got redirected from step 4 (wait page).
+Step 5 of login process : see doc in magicauth/views.py for step details
 '''
 
 pytestmark = mark.django_db

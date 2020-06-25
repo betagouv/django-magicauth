@@ -7,9 +7,7 @@ from tests import factories
 
 
 '''
-Step 4 of login process (optional): you visit the link that you got by email that sends you to the
-wait page.
-If the wait page is not used, then the link will send you directly to step 5, token validation.
+Step 4 of login process : see doc in magicauth/views.py for step details
 
 Note : We do not test that the javascript actually does the redirect. We just test the django template's context.
 '''
