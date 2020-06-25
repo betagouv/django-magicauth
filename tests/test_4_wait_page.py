@@ -1,16 +1,20 @@
 from pytest import mark
-import urllib.parse
 
 from django.shortcuts import reverse
 from magicauth import settings
+import urllib.parse
 from tests import factories
 
 
+'''
+Step 4 of login process (optional): you visit the link that you got by email that sends you to the
+wait page.
+If the wait page is not used, then the link will send you directly to step 5, token validation.
+
+Note : We do not test that the javascript actually does the redirect. We just test the django template's context.
+'''
+
 pytestmark = mark.django_db
-
-
-# Note : We do not test that the javascript actually does the redirect.
-
 
 def open_magic_link_with_wait(client, token, next=None):
     url = reverse("magicauth-wait", kwargs={"key": token.key})

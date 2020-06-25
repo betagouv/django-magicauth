@@ -5,6 +5,9 @@ from django.shortcuts import reverse
 from magicauth.models import MagicToken
 from tests import factories
 
+'''
+Step 2 of login process : POST your email (and optionnally your TOTP) to the login page.
+'''
 
 pytestmark = mark.django_db
 

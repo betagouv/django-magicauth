@@ -3,6 +3,9 @@ from pytest import mark
 from django.shortcuts import reverse
 from tests import factories
 
+'''
+Step 1 of login process : GET the login page.
+'''
 
 pytestmark = mark.django_db
 

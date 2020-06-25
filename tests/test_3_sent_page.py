@@ -3,6 +3,9 @@ from pytest import mark
 from django.shortcuts import reverse
 from tests import factories
 
+'''
+Step 3 of login process : you get a confirmation page that the email was sent.
+'''
 
 pytestmark = mark.django_db
 
