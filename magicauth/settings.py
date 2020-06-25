@@ -30,6 +30,8 @@ FROM_EMAIL = getattr(django_settings, "MAGICAUTH_FROM_EMAIL")
 # Login view :
 # the view in which your user enters their email to start the login process.
 LOGIN_URL = getattr(django_settings, "MAGICAUTH_LOGIN_URL", "login/")
+# Template for the login view if you want to customise it. It has to contain a form, with a field
+# with type="email" and name="email".
 LOGIN_VIEW_TEMPLATE = getattr(
     django_settings, "MAGICAUTH_LOGIN_VIEW_TEMPLATE", "magicauth/login.html"
 )
