@@ -8,6 +8,9 @@ from magicauth.models import MagicToken
 from magicauth import settings
 from tests import factories
 
+'''
+Step 5 of login process : see doc in magicauth/views.py for step details
+'''
 
 pytestmark = mark.django_db
 
