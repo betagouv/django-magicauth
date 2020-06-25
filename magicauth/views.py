@@ -14,6 +14,8 @@ from django.views.generic import View, FormView, TemplateView
 from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
 from magicauth.models import MagicToken
+from magicauth.send_token import SendTokenMixin
+
 
 logger = logging.getLogger()
 
@@ -54,7 +56,7 @@ class NextUrlMixin(object):
         return context
 
 
-class LoginView(NextUrlMixin, FormView):
+class LoginView(NextUrlMixin, SendTokenMixin, FormView):
     """
     Step 1 of login process : GET the LoginView.
     Step 2 of login process : POST your email to the LoginView.
@@ -85,9 +87,9 @@ class LoginView(NextUrlMixin, FormView):
         return f"{url}?next={next_url_quoted}"
 
     def form_valid(self, form, *args, **kwargs):
-        next_url = self.get_next_url(self.request)
-        current_site = self.request.site
-        form.send_email(current_site, next_url)
+        user_email = form.cleaned_data["email"]
+        context = {"next_url": self.get_next_url(self.request)}
+        self.send_email(user_email=user_email, extra_context=context)
         return super().form_valid(form)
 
 
