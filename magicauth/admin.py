@@ -5,5 +5,5 @@ from .models import MagicToken
 
 @admin.register(MagicToken)
 class MagicTokenAdmin(admin.ModelAdmin):
-    list_display = ("key", "user", "created")
+    list_display = ("user", "created", "key")
     raw_id_fields = ("user",)
