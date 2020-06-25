@@ -89,7 +89,7 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
     def form_valid(self, form, *args, **kwargs):
         user_email = form.cleaned_data["email"]
         context = {"next_url": self.get_next_url(self.request)}
-        self.send_email(user_email=user_email, extra_context=context)
+        self.send_token(user_email=user_email, extra_context=context)
         return super().form_valid(form)
 
 
