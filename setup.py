@@ -15,9 +15,10 @@ setup(
     license="",
     description=(
         "Password-less authentication: login by clicking on "
-        "a magic link received by email."),
+        "a magic link received by email."
+    ),
     long_description=README,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     url="",
     author="",
     author_email="",
@@ -25,7 +26,7 @@ setup(
         "Environment :: Web Environment",
         "Framework :: Django",
         "Intended Audience :: Developers",
-        'License :: OSI Approved :: BSD License',
+        "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python",

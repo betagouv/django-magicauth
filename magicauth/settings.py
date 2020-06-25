@@ -30,8 +30,8 @@ FROM_EMAIL = getattr(django_settings, "MAGICAUTH_FROM_EMAIL")
 # Login view :
 # the view in which your user enters their email to start the login process.
 LOGIN_URL = getattr(django_settings, "MAGICAUTH_LOGIN_URL", "login/")
-# Template for the login view if you want to customise it. It has to contain a form, with a field
-# with type="email" and name="email".
+# Template for the login view if you want to customise it. It has to contain a form,
+# with a field with type="email" and name="email".
 LOGIN_VIEW_TEMPLATE = getattr(
     django_settings, "MAGICAUTH_LOGIN_VIEW_TEMPLATE", "magicauth/login.html"
 )
@@ -48,9 +48,10 @@ EMAIL_SENT_URL = getattr(django_settings, "MAGICAUTH_EMAIL_SENT_URL", "email-env
 # Wait view :
 # The emailed links point to this url. It shows a wait message, makes the user wait for
 # WAIT_SECONDS, and then redirects them to the VALIDATE_TOKEN_URL (see below).
-# Why do we have this view? Because some mail clients visit links their find in email, to check them for spam,
-# phishing, etc. So that when the user clicks the link in the email, the antispam bot has already "clicked" it first.
-# Adding this intermediary view avoids having the antispam bot invalidate the token and block the user login : the bot
+# Why do we have this view? Because some mail clients visit links their find in email,
+# to check them for spam, phishing, etc. So that when the user clicks the link in the
+# email, the antispam bot has already "clicked" it first. Adding this intermediary view
+# avoids having the antispam bot invalidate the token and block the user login : the bot
 # visits the view but does not wait long enough, so the login is not triggered.
 WAIT_VIEW_TEMPLATE = getattr(
     django_settings, "MAGICAUTH_WAIT_VIEW_TEMPLATE", "magicauth/wait.html"
@@ -59,7 +60,8 @@ WAIT_VIEW_TEMPLATE = getattr(
 WAIT_URL = getattr(django_settings, "MAGICAUTH_WAIT_URL", "chargement/code/<str:key>/")
 
 # Validate token view :
-# validates the token in the url, does the login, and redirects to LOGGED_IN_REDIRECT_URL_NAME.
+# validates the token in the url, does the login, and redirects to
+# LOGGED_IN_REDIRECT_URL_NAME.
 # This view has no template, the user never sees it.
 # The view will look for the token in the "key" variable.
 VALIDATE_TOKEN_URL = getattr(
@@ -67,8 +69,8 @@ VALIDATE_TOKEN_URL = getattr(
 )
 
 # Logged in redirect view :
-# view on which the user lands once logged in. This is a view in your site, probably something
-# like "home".
+# view on which the user lands once logged in. This is a view in your site, probably
+# something like "home".
 LOGGED_IN_REDIRECT_URL_NAME = getattr(
     django_settings, "MAGICAUTH_LOGGED_IN_REDIRECT_URL_NAME"
 )
@@ -95,6 +97,4 @@ EMAIL_UNKNOWN_MESSAGE = getattr(
     django_settings, "MAGICAUTH_EMAIL_UNKNOWN_MESSAGE", "Aucun utilisateur trouvé."
 )
 # How long the user will wait on the WAIT_URL page before doing the actual login.
-WAIT_SECONDS = getattr(
-    django_settings, "MAGICAUTH_WAIT_SECONDS", 3
-)
+WAIT_SECONDS = getattr(django_settings, "MAGICAUTH_WAIT_SECONDS", 3)

@@ -21,10 +21,10 @@ class SendTokenMixin(object):
     def get_user_from_email(self, user_email):
         """
         Query the DB for the user corresponding to the email.
-         - We use get_user_model() instead of User (in case the Django app has customised the User
-        class)
-         - We use magicauth_settings.EMAIL_FIELD, which is the name of the field in the user
-        model. By default "username" but not always.
+        - We use get_user_model() instead of User (in case the Django app has customised
+        the User class)
+        - We use magicauth_settings.EMAIL_FIELD, which is the name of the field in the
+        user model. By default "username" but not always.
         """
         user_class = get_user_model()
         email_field = magicauth_settings.EMAIL_FIELD
@@ -41,7 +41,9 @@ class SendTokenMixin(object):
             "token": token,
             "user": user,
             "site": get_current_site(self.request),
-            "TOKEN_DURATION_MINUTES": math.floor(magicauth_settings.TOKEN_DURATION_SECONDS / 60),
+            "TOKEN_DURATION_MINUTES": math.floor(
+                magicauth_settings.TOKEN_DURATION_SECONDS / 60
+            ),
             "TOKEN_DURATION_SECONDS": magicauth_settings.TOKEN_DURATION_SECONDS,
         }
         if extra_context:

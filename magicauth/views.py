@@ -59,25 +59,31 @@ class EmailSentView(NextUrlMixin, TemplateView):
     """
     Step 3 of login process : you get a confirmation page that the email was sent.
     """
+
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
 class WaitView(NextUrlMixin, TemplateView):
     """
-    Step 4 of login process (optional): you visit the link that you got by email that sends you to
-    the WaitView.
-    If the WaitView is not used, then the link will send you directly to step 5, token validation.
+    Step 4 of login process (optional): you visit the link that you got by email that
+    sends you to the WaitView.
+    If the WaitView is not used, then the link will send you directly to step 5, token
+    validation.
 
     Th WaitView will wait few seconds, redirect you to the token validation.
     This is for solving an issue with a security feature in some email clients where
-    the magic link is verified and and thus the token gets invalidated by the email client.
+    the magic link is verified and and thus the token gets invalidated by the email
+    client.
     """
+
     template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        validate_token_url = reverse('magicauth-validate-token', kwargs={'key': token_key})
+        validate_token_url = reverse(
+            "magicauth-validate-token", kwargs={"key": token_key}
+        )
         next_url_quoted = self.get_next_url_encoded(self.request)
         context["next_step_url"] = f"{validate_token_url}?next={next_url_quoted}"
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
@@ -86,14 +92,15 @@ class WaitView(NextUrlMixin, TemplateView):
 
 class ValidateTokenView(NextUrlMixin, View):
     """
-    Step 5 of login process : you visit the ValidateTokenView that validates the token, logs you in,
-    and redirects you to the url in the "next" param (or the default view if no next).
+    Step 5 of login process : you visit the ValidateTokenView that validates the token,
+    logs you in, and redirects you to the url in the "next" param (or the default view
+    if no next).
 
-    Either you clicked a link to this page in your email, or you got redirected from step 4
-    (WaitView).
+    Either you clicked a link to this page in your email, or you got redirected from
+    step 4 (WaitView).
 
-    If the token is invalid, you are not logged in, and you are redirected to LoginView (step 1) to
-    start over.
+    If the token is invalid, you are not logged in, and you are redirected to LoginView
+    (step 1) to start over.
     """
 
     @staticmethod

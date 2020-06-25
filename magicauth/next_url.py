@@ -26,7 +26,9 @@ class NextUrlMixin(object):
             next_url = reverse(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
         # the following `is_safe_url` will be deprecated in django 4 and replaced by
         # url_has_allowed_host_and_scheme
-        if not is_safe_url(next_url, allowed_hosts={request.get_host()}, require_https=True):
+        if not is_safe_url(
+            next_url, allowed_hosts={request.get_host()}, require_https=True
+        ):
             # We are not logging the unsafe URL to prevent code injections in logs
             logger.warning("[MagicAuth] an unsafe URL was used through a login link")
             raise Http404
@@ -34,8 +36,8 @@ class NextUrlMixin(object):
 
     def get_next_url_encoded(self, request):
         """
-        Use this when the URL needs to be encoded, for instance when including the URL to string
-        before a redirect.
+        Use this when the URL needs to be encoded, for instance when including the URL
+        to string before a redirect.
         """
         url = self.get_next_url(self.request)
         return urllib.parse.quote(url)

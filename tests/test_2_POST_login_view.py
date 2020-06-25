@@ -5,9 +5,9 @@ from django.shortcuts import reverse
 from magicauth.models import MagicToken
 from tests import factories
 
-'''
+"""
 Step 2 of login process : see doc in magicauth/views.py for step details
-'''
+"""
 
 pytestmark = mark.django_db
 
