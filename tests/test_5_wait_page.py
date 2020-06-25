@@ -20,7 +20,7 @@ def open_magic_link_with_wait(client, token, next=None):
     return client.get(url)
 
 
-def test_wait_page_raises_loads(client):
+def test_wait_page_loads(client):
     url = reverse("magicauth-wait", kwargs={"key": 'some-token'})
     response = client.get(url)
     assert response.status_code == 200
