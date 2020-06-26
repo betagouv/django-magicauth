@@ -2,20 +2,26 @@
 
 Django Magicauth brings password-less authentication to your project.
 
-*How it works ?*
+*How it works*
+
+The user inputs their email address.
 
 An email is sent to the user with a link that contains a one-time token.
-Once they clic on this link, they are logged in to the service.
+
+Once they click on this link, they are logged in to the service.
 
 
 ## Fonctionnement (FR)
 
-Authentifiez vos utilisateurs sans mot de passe avec Django Magicauth
+Authentifiez vos utilisateurs sans mot de passe avec Django Magicauth.
 
-Lorsqu'un service utilise Django Magicauth, les utilisateurs s'authentifient
-en entrant leur adresse email.
+*Comment ça marche*
+
+Les utilisateurs renseignent leur adresse email.
+
 Ils reçoivent alors un email avec un lien de connexion.
-S'ils cliquent sur le lien, ils sont authentifiés et redirigés sur le service.
+
+Lorsqu'ils cliquent sur le lien, ils sont authentifiés et redirigés sur le service.
 
 
 # Installations and testing instructions
