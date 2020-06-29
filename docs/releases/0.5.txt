@@ -1,0 +1,9 @@
+====================
+Django MagicAuth 0.5
+====================
+
+- Add MIT license
+- Refactoring around next url and the send token features
+- Minor updates on the email template
+- Clean-up unit tests
+- Update README
