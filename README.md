@@ -8,6 +8,7 @@ Note : the screenshots below use the default templates, which don't look very ni
 
 Step 1 : the user goes to the login page. (see `LoginView` in `magicauth/views.py`)
 
+![Screen Shot 2020-06-30 at 16 04 29](https://user-images.githubusercontent.com/911434/86135682-74ed2180-baeb-11ea-9d0c-cd18d05857c7.png)
 
 Step 2 : The user inputs their email address in the login page.
 
@@ -19,7 +20,8 @@ Step 3 : The user sees a confirmation page (`EmailSentView`), explaining that an
 
 An email is sent to the user with a link that contains a one-time token.
 
-![Screen Shot 2020-06-30 at 15 15 57](https://user-images.githubusercontent.com/911434/86130772-f55c5400-bae4-11ea-96b9-3a4507b4e9f4.png)
+![Screen Shot 2020-06-30 at 16 14 47](https://user-images.githubusercontent.com/911434/86136856-d6fa5680-baec-11ea-833f-696968cb762f.png)
+
 
 The link looks something like this :
 
