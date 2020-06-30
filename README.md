@@ -4,11 +4,36 @@ Django Magicauth brings password-less authentication to your project.
 
 *How it works*
 
-The user inputs their email address.
+Note : the screenshots below use the default templates, which don't look very nice. It is expected that you replace them with your own better-looking ones.
+
+Step 1 : the user goes to the login page. (see `LoginView` in `magicauth/views.py`)
+
+
+Step 2 : The user inputs their email address in the login page.
+
+![Screen Shot 2020-06-30 at 15 14 22](https://user-images.githubusercontent.com/911434/86130756-efff0980-bae4-11ea-8df7-9fe183a6d5dd.png)
+
+Step 3 : The user sees a confirmation page (`EmailSentView`), explaining that an email has been sent.
+
+![Screen Shot 2020-06-30 at 15 14 40](https://user-images.githubusercontent.com/911434/86130765-f2f9fa00-bae4-11ea-88b9-c74e2b791fff.png)
 
 An email is sent to the user with a link that contains a one-time token.
 
-Once they click on this link, they are logged in to the service.
+![Screen Shot 2020-06-30 at 15 15 57](https://user-images.githubusercontent.com/911434/86130772-f55c5400-bae4-11ea-96b9-3a4507b4e9f4.png)
+
+The link looks something like this :
+
+![Screen Shot 2020-06-30 at 15 16 22](https://user-images.githubusercontent.com/911434/86130775-f8574480-bae4-11ea-9158-a06cdcb29e8b.png)
+
+Step 4 : once they click on the button and follow the link, the user is directed to a wait page (this is optional) (`WaitView`)
+
+![Screen Shot 2020-06-30 at 15 17 11](https://user-images.githubusercontent.com/911434/86130782-fbeacb80-bae4-11ea-8d7e-4ff9a42ae5ed.png)
+
+Step 5 : the user is logged in to the service (`ValidateTokenView`) and redirected to the landing page.
+
+![Screen Shot 2020-06-30 at 15 44 59](https://user-images.githubusercontent.com/911434/86133987-5be37100-bae9-11ea-844a-97ba5de5722d.png)
+
+
 
 
 ## Fonctionnement (FR)
