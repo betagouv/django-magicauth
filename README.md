@@ -4,42 +4,11 @@ Django Magicauth brings password-less authentication to your project.
 
 *How it works*
 
-Note : the screenshots below use the default templates, which don't look very nice. It is expected that you replace them with your own better-looking ones.
+ - The user inputs their email address.
+ - An email is sent to the user with a link that contains a one-time token.
+ - Once they click on this link, they are logged in to the service.
 
-Step 1 : the user goes to the login page. (see `LoginView` in `magicauth/views.py`)
-
-<kbd><img src="https://user-images.githubusercontent.com/911434/86135682-74ed2180-baeb-11ea-9d0c-cd18d05857c7.png" /></kbd>
-
-
-Step 2 : The user inputs their email address in the login page.
-
-<kbd><img src="https://user-images.githubusercontent.com/911434/86130756-efff0980-bae4-11ea-8df7-9fe183a6d5dd.png" /></kbd>
-
-
-Step 3 : The user sees a confirmation page (`EmailSentView`), explaining that an email has been sent.
-
-<kbd><img src="https://user-images.githubusercontent.com/911434/86130765-f2f9fa00-bae4-11ea-88b9-c74e2b791fff.png" /></kbd>
-
-An email is sent to the user with a link that contains a one-time token.
-
-<kbd><img src="https://user-images.githubusercontent.com/911434/86136856-d6fa5680-baec-11ea-833f-696968cb762f.png" /></kbd>
-
-
-The link looks something like this :
-
-<kbd><img src="https://user-images.githubusercontent.com/911434/86130775-f8574480-bae4-11ea-9158-a06cdcb29e8b.png" /></kbd>
-
-
-Step 4 : once they click on the button and follow the link, the user is directed to a wait page (this is optional) (`WaitView`)
-
-<kbd><img src="https://user-images.githubusercontent.com/911434/86130782-fbeacb80-bae4-11ea-8d7e-4ff9a42ae5ed.png" /></kbd>
-
-Step 5 : the user is logged in to the service (`ValidateTokenView`) and redirected to the landing page.
-
-<kbd><img src="https://user-images.githubusercontent.com/911434/86133987-5be37100-bae9-11ea-844a-97ba5de5722d.png" /></kbd>
-
-
-
+For a detailed step-by-step with screenshots of the default templates, see #Step-by-step-in-pictures.
 
 ## Fonctionnement (FR)
 
@@ -47,11 +16,11 @@ Authentifiez vos utilisateurs sans mot de passe avec Django Magicauth.
 
 *Comment ça marche*
 
-Les utilisateurs renseignent leur adresse email.
+ - Les utilisateurs renseignent leur adresse email.
+ - Ils reçoivent alors un email avec un lien de connexion.
+ - Lorsqu'ils cliquent sur le lien, ils sont authentifiés et redirigés sur le service.
 
-Ils reçoivent alors un email avec un lien de connexion.
-
-Lorsqu'ils cliquent sur le lien, ils sont authentifiés et redirigés sur le service.
+Pour un détail du fonctionnement en image, voir #Step-by-step-in-pictures.
 
 
 # Installations and testing instructions
@@ -139,3 +108,40 @@ cd src/django-magicauth
 pip install -r requirements.txt
 tox
 ```
+
+# Step-by-step in pictures
+
+Note : the screenshots below use the default templates, which don't look very nice. It is expected that you replace them with your own better-looking ones.
+
+Step 1 : the user goes to the login page. (see `LoginView` in `magicauth/views.py`)
+
+<kbd><img src="https://user-images.githubusercontent.com/911434/86135682-74ed2180-baeb-11ea-9d0c-cd18d05857c7.png" /></kbd>
+
+
+Step 2 : The user inputs their email address in the login page.
+
+<kbd><img src="https://user-images.githubusercontent.com/911434/86130756-efff0980-bae4-11ea-8df7-9fe183a6d5dd.png" /></kbd>
+
+
+Step 3 : The user sees a confirmation page (`EmailSentView`), explaining that an email has been sent.
+
+<kbd><img src="https://user-images.githubusercontent.com/911434/86130765-f2f9fa00-bae4-11ea-88b9-c74e2b791fff.png" /></kbd>
+
+An email is sent to the user with a link that contains a one-time token.
+
+<kbd><img src="https://user-images.githubusercontent.com/911434/86136856-d6fa5680-baec-11ea-833f-696968cb762f.png" /></kbd>
+
+
+The link looks something like this :
+
+<kbd><img src="https://user-images.githubusercontent.com/911434/86130775-f8574480-bae4-11ea-9158-a06cdcb29e8b.png" /></kbd>
+
+
+Step 4 : once they click on the button and follow the link, the user is directed to a wait page (this is optional) (`WaitView`)
+
+<kbd><img src="https://user-images.githubusercontent.com/911434/86130782-fbeacb80-bae4-11ea-8d7e-4ff9a42ae5ed.png" /></kbd>
+
+Step 5 : the user is logged in to the service (`ValidateTokenView`) and redirected to the landing page.
+
+<kbd><img src="https://user-images.githubusercontent.com/911434/86133987-5be37100-bae9-11ea-844a-97ba5de5722d.png" /></kbd>
+
