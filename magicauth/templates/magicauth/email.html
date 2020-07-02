@@ -318,14 +318,25 @@
                           </tbody>
                         </table>
                         <p>Ce lien n'est valable que {{ TOKEN_DURATION_MINUTES }} minutes. Il est à usage unique.</p>
-                        <p>Bonne journée,</p>
-                        <p>L'équipe de {{ site.domain }}</p>
+                        <hr>
+                        <div>
+                          <p>Des difficultés pour vous connecter ?</p>
+                          <p>
+                            Nous vous recommandons de copier-coller ce lien dans un navigateur :
+                          </p>
+                          <p class="mb-6 align-center">
+                            <strong>
+                              https://{{ site.domain }}{% url 'magicauth-wait' token.key %}?next={{ next_url|urlencode }}
+                            </strong>
+                          </p>
+                          <p>Bonne journée,</p>
+                          <p>L'équipe de {{ site.domain }}</p>
+                        </div>
                       </td>
                     </tr>
                   </table>
                 </td>
               </tr>
-
             <!-- END MAIN CONTENT AREA -->
             </table>
           <!-- END CENTERED WHITE CONTAINER -->
