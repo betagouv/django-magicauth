@@ -1,6 +1,7 @@
 from pytest import mark
 
 from django.shortcuts import reverse
+from magicauth import settings
 from tests import factories
 
 '''
@@ -47,3 +48,16 @@ def test_login_page_raises_404_if_unsafe_next_url_with_authenticated_user(client
     response = client.get(url, {"next": "http://www.myfishingsite.com/"})
     assert user.is_authenticated
     assert response.status_code == 404
+
+
+def test_template_displays_totp_field_when_2FA_enabled(client):
+    settings.ENABLE_2FA = True
+    response = client.get(reverse("magicauth-login"))
+    assert response.status_code == 200
+    assert "Entrez le code" in str(response.content)
+
+def test_template_does_not_displays_totp_field_when_2FA_disabled(client):
+    settings.ENABLE_2FA = False
+    response = client.get(reverse("magicauth-login"))
+    assert response.status_code == 200
+    assert "Entrez le code" not in str(response.content)
