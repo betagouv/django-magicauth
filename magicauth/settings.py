@@ -98,3 +98,14 @@ EMAIL_UNKNOWN_MESSAGE = getattr(
 WAIT_SECONDS = getattr(
     django_settings, "MAGICAUTH_WAIT_SECONDS", 3
 )
+# This enables the 2FA OTP field
+ENABLE_2FA = getattr(
+    django_settings, "MAGICAUTH_ENABLE_2FA", False
+)
+# Can be 6 or 8 (https://django-otp-official.readthedocs.io/en/stable/overview.html#django_otp.plugins.otp_totp.models.TOTPDevice.digits)
+OTP_NUM_DIGITS = getattr(
+    django_settings, "MAGICAUTH_OTP_NUM_DIGITS", 6
+)
+if OTP_NUM_DIGITS not in [6, 8] :
+    raise ValueError("OTP_NUM_DIGITS must be either 6 or 8 character long --> https://django-otp-official.readthedocs.io/en/stable/overview.html#django_otp.plugins.otp_totp.models.TOTPDevice.digits")
+
