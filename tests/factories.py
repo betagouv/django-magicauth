@@ -9,7 +9,7 @@ faker = FakerFactory.create("fr_FR")
 
 
 @register
-class UserFactory(factory.DjangoModelFactory):
+class UserFactory(factory.django.DjangoModelFactory):
     email = factory.LazyFunction(faker.email)
     username = factory.LazyAttribute(lambda a: a.email)
 
@@ -18,7 +18,7 @@ class UserFactory(factory.DjangoModelFactory):
 
 
 @register
-class MagicTokenFactory(factory.DjangoModelFactory):
+class MagicTokenFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
 
     class Meta:
