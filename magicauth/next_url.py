@@ -26,9 +26,11 @@ class NextUrlMixin(object):
         If the next parameter is not there, returns the default redirect url
         """
         next_url = request.GET.get("next")
+
         if not next_url:
             next_url = reverse(magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME)
-        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=True):
+
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts=magicauth_settings.ALLOWED_HOSTS, require_https=True):
             # We are not logging the unsafe URL to prevent code injections in logs
             logger.warning("[MagicAuth] an unsafe URL was used through a login link")
             raise Http404

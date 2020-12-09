@@ -1,3 +1,5 @@
+ALLOWED_HOSTS="testserver"
+
 SECRET_KEY = "can you keep a secret?"
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}

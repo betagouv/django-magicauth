@@ -108,4 +108,5 @@ OTP_NUM_DIGITS = getattr(
 )
 if OTP_NUM_DIGITS not in [6, 8] :
     raise ValueError("OTP_NUM_DIGITS must be either 6 or 8 character long --> https://django-otp-official.readthedocs.io/en/stable/overview.html#django_otp.plugins.otp_totp.models.TOTPDevice.digits")
-
+# Allowed hosts
+ALLOWED_HOSTS = getattr(django_settings, "ALLOWED_HOSTS")

@@ -29,3 +29,4 @@ def test_email_sent_page_raises_404_if_unsafe_next_url_with_authenticated_user(c
     response = client.get(url)
     assert response.status_code == 404
     assert user.is_authenticated
+

@@ -1,7 +1,7 @@
 import math
 
 from django.contrib.auth import get_user_model
-from django.contrib.sites.shortcuts import get_current_site
+from django.http import HttpResponseBadRequest
 from django.core.mail import send_mail
 from django.template import loader
 
@@ -37,10 +37,15 @@ class SendTokenMixin(object):
         html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
         text_template = magicauth_settings.EMAIL_TEXT_TEMPLATE
         from_email = magicauth_settings.FROM_EMAIL
+        request_site = self.request.get_host()
+
+        if request_site not in magicauth_settings.ALLOWED_HOSTS :
+            return HttpResponseBadRequest
+
         context = {
             "token": token,
             "user": user,
-            "site": get_current_site(self.request),
+            "site": request_site,
             "TOKEN_DURATION_MINUTES": math.floor(magicauth_settings.TOKEN_DURATION_SECONDS / 60),
             "TOKEN_DURATION_SECONDS": magicauth_settings.TOKEN_DURATION_SECONDS,
         }
