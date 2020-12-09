@@ -7,9 +7,11 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic import View, FormView, TemplateView
-
+from django.contrib.auth import get_user_model
 from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
+
+from magicauth.forms import EmailForm, OTPForm
 from magicauth.models import MagicToken
 from magicauth.next_url import NextUrlMixin
 from magicauth.send_token import SendTokenMixin
@@ -40,6 +42,8 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
             "LOGGED_IN_REDIRECT_URL_NAME"
         ] = magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
+        context["OTP_enabled"] = magicauth_settings.ENABLE_2FA
+        context["OTP_form"] = OTPForm(self.request.user)
         return context
 
     def get_success_url(self, **kwargs):
@@ -51,8 +55,23 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
     def form_valid(self, form, *args, **kwargs):
         user_email = form.cleaned_data["email"]
         context = {"next_url": self.get_next_url(self.request)}
-        self.send_token(user_email=user_email, extra_context=context)
-        return super().form_valid(form)
+
+        def is_OTP_valid():
+            if not magicauth_settings.ENABLE_2FA:
+                return True
+            user = get_user_model().objects.get(email=user_email)
+            OTP_form = OTPForm(user=user, data=self.request.POST)
+            if OTP_form.is_valid():
+                return True
+            for error in OTP_form.errors["otp_token"] :
+                form.add_error("email", error)
+                return False
+
+        if is_OTP_valid():
+            self.send_token(user_email=user_email, extra_context=context)
+            return super().form_valid(form)
+
+        return super().form_invalid(form)
 
 
 class EmailSentView(NextUrlMixin, TemplateView):

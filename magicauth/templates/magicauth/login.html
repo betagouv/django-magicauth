@@ -30,6 +30,12 @@
                         <div class="alet alert-danger text-center">{{ error }}</div>
                       {% endfor %}
                     </div>
+                    {% if OTP_enabled %}
+                      <div class="form-group">
+                        <label>{{ OTP_form.otp_token.label_tag }}</label>
+                        {{ OTP_form.otp_token }}
+                      </div>
+                    {% endif %}
                     <div class="form-footer">
                       <button type="submit" class="btn btn-primary btn-block">Valider</button>
                     </div>

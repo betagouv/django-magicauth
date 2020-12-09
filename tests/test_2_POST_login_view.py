@@ -2,6 +2,7 @@ from pytest import mark
 
 from django.core import mail
 from django.shortcuts import reverse
+from magicauth import settings
 from magicauth.models import MagicToken
 from tests import factories
 
@@ -72,4 +73,50 @@ def test_posting_unknown_email_raise_error(client):
 
 def test_posting_unknown_email_does_not_send_email(client):
     post_email(client, "unknown@email.com")
+    assert len(mail.outbox) == 0
+
+# Tests with OTPs
+def post_email_and_OTP(client, email, OTP):
+    url = reverse("magicauth-login")
+    data = {"email": email, "otp_token": OTP}
+    return client.post(url, data=data)
+
+def test_posting_good_email_and_good_totp_success(client):
+    settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device = thierry.staticdevice_set.create()
+    device.token_set.create(token="123456")
+
+    response = post_email_and_OTP(client, thierry.email, "123456")
+
+    assert response.status_code == 302
+    assert len(mail.outbox) == 1
+
+
+def test_posting_good_email_and_wrong_otp_error(client):
+    settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device = thierry.staticdevice_set.create()
+    device.token_set.create(token="123456")
+
+    response = post_email_and_OTP(client, thierry.email, "567654")
+
+    assert response.status_code == 200
+    assert "Ce code n&#x27;est pas valide." in str(response.content)
+    assert len(mail.outbox) == 0
+
+
+def test_posting_wrong_email_and_wrong_otp_error(client):
+    settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device = thierry.staticdevice_set.create()
+    device.token_set.create(token="123456")
+
+    response = post_email_and_OTP(client, "unknown@email.com", "567654")
+
+    assert response.status_code == 200
+    assert "invalid" in str(response.content)
     assert len(mail.outbox) == 0
