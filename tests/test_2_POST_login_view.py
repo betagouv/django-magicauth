@@ -121,6 +121,7 @@ def test_posting_wrong_email_and_wrong_otp_error(client):
     assert "invalid" in str(response.content)
     assert len(mail.outbox) == 0
 
+
 def test_thierry_has_several_devices_first_device(client):
     settings.ENABLE_2FA = True
     token = factories.MagicTokenFactory()
@@ -135,6 +136,7 @@ def test_thierry_has_several_devices_first_device(client):
     assert response.status_code == 302
     assert len(mail.outbox) == 1
 
+
 def test_thierry_has_several_devices_second_device(client):
     settings.ENABLE_2FA = True
     token = factories.MagicTokenFactory()
@@ -148,3 +150,4 @@ def test_thierry_has_several_devices_second_device(client):
 
     assert response.status_code == 302
     assert len(mail.outbox) == 1
+

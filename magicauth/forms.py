@@ -52,3 +52,4 @@ class OTPForm(forms.Form):
 
         raise ValidationError("Ce code n'est pas valide.")
 
+
