@@ -131,8 +131,8 @@ class ValidateTokenView(NextUrlMixin, View):
         return token
 
     def get(self, request, *args, **kwargs):
-        url = self.get_next_url(request)
         if request.user.is_authenticated:
+            url = self.get_next_url(request)
             return redirect(url)
         token_key = kwargs.get("key")
         token = self.get_valid_token(token_key)
@@ -144,6 +144,7 @@ class ValidateTokenView(NextUrlMixin, View):
                 "votre email ci-dessous puis à cliquer sur valider.",
             )
             return redirect("magicauth-login")
+        url = self.get_next_url(request)
         login(self.request, token.user)
         MagicToken.objects.filter(
             user=token.user
