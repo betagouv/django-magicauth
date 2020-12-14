@@ -120,3 +120,31 @@ def test_posting_wrong_email_and_wrong_otp_error(client):
     assert response.status_code == 200
     assert "invalid" in str(response.content)
     assert len(mail.outbox) == 0
+
+def test_thierry_has_several_devices_first_device(client):
+    settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device_1 = thierry.staticdevice_set.create()
+    device_1.token_set.create(token="123456")
+    device_2 = thierry.staticdevice_set.create()
+    device_2.token_set.create(token="111111")
+
+    response = post_email_and_OTP(client, thierry.email, "123456")
+
+    assert response.status_code == 302
+    assert len(mail.outbox) == 1
+
+def test_thierry_has_several_devices_second_device(client):
+    settings.ENABLE_2FA = True
+    token = factories.MagicTokenFactory()
+    thierry = token.user
+    device_1 = thierry.staticdevice_set.create()
+    device_1.token_set.create(token="123456")
+    device_2 = thierry.staticdevice_set.create()
+    device_2.token_set.create(token="111111")
+
+    response = post_email_and_OTP(client, thierry.email, "111111")
+
+    assert response.status_code == 302
+    assert len(mail.outbox) == 1
