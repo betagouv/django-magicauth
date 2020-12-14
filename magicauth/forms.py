@@ -47,10 +47,8 @@ class OTPForm(forms.Form):
             raise ValidationError("Le système n'a pas trouvé d'appareil (carte OTP ou générateur sur téléphone) pour votre compte. Contactez le support pour en ajouter un.")
 
         for device in devices_for_user(user):
-            if not device.verify_is_allowed():
-                raise ValidationError("Vous devez patienter avant de recommencer")
-            if not device.verify_token(otp_token):
-                raise ValidationError("Ce code n'est pas valide.")
+            if device.verify_is_allowed() and device.verify_token(otp_token):
+                return otp_token
 
-        return otp_token
+        raise ValidationError("Ce code n'est pas valide.")
 
