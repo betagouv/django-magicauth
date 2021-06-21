@@ -136,6 +136,14 @@ pip install -r requirements.txt
 tox
 ```
 
+# Projects using Magicauth
+https://github.com/betagouv/e-controle/
+https://github.com/betagouv/Aidants_Connect
+https://github.com/betagouv/peps
+https://github.com/betagouv/urbanvitaliz-django
+
+Join us !
+
 # Step-by-step in pictures
 
 Note : the screenshots below use the default templates, which don't look very nice. It is expected that you replace them with your own better-looking ones.
