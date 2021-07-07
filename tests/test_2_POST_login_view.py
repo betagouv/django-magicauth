@@ -2,6 +2,7 @@ from pytest import mark
 
 from django.core import mail
 from django.shortcuts import reverse
+from faker import Factory as FakerFactory
 from magicauth import settings
 from magicauth.models import MagicToken
 from tests import factories
@@ -64,6 +65,16 @@ def test_loging_with_email_is_case_insensitive(client):
     response = post_email(client, user.email.upper())
     assert response.status_code == 302
     assert len(mail.outbox) == 1
+
+    settings.ENABLE_2FA = True
+
+    # Testing the case of email with capital letters in DB
+    user = factories.UserFactory(email=FakerFactory.create("fr_FR").email().upper())
+    device = user.staticdevice_set.create()
+    device.token_set.create(token="789456")
+    response = post_email_and_OTP(client, user.email.lower(), "789456")
+    assert response.status_code == 302
+    assert len(mail.outbox) == 2
 
 
 def test_posting_unknown_email_raise_error(client):
