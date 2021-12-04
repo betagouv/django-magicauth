@@ -11,10 +11,14 @@ from django.contrib.auth import get_user_model
 from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
 
-from magicauth.forms import EmailForm, OTPForm
 from magicauth.models import MagicToken
 from magicauth.next_url import NextUrlMixin
 from magicauth.send_token import SendTokenMixin
+
+try:
+    from magicauth.otp_forms import OTPForm
+except ImportError:
+    pass  # OTP form class is optional
 
 
 logger = logging.getLogger()
@@ -43,7 +47,8 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
         ] = magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
         context["OTP_enabled"] = magicauth_settings.ENABLE_2FA
-        context["OTP_form"] = OTPForm(self.request.user)
+        if magicauth_settings.ENABLE_2FA:
+            context["OTP_form"] = OTPForm(self.request.user)
         return context
 
     def get_success_url(self, **kwargs):
