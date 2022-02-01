@@ -59,11 +59,14 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
         def is_OTP_valid():
             if not magicauth_settings.ENABLE_2FA:
                 return True
-            user = get_user_model().objects.get(email=user_email)
+
+            email_field = "%s__iexact" % magicauth_settings.EMAIL_FIELD
+            user = get_user_model().objects.get(**{email_field: user_email})
+
             OTP_form = OTPForm(user=user, data=self.request.POST)
             if OTP_form.is_valid():
                 return True
-            for error in OTP_form.errors["otp_token"] :
+            for error in OTP_form.errors["otp_token"]:
                 form.add_error("email", error)
                 return False
 
