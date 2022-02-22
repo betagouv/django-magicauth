@@ -13,7 +13,7 @@ class OTPForm(forms.Form):
         max_length=OTP_NUM_DIGITS,
         min_length=OTP_NUM_DIGITS,
         validators=[RegexValidator(r"^\d{6}$")],
-        label=f"Entrez le code à {OTP_NUM_DIGITS} chiffres généré par votre téléphone ou votre carte OTP",
+        label=f"Entrez le code à {OTP_NUM_DIGITS} chiffres généré par votre téléphone ou votre carte Aidants Connect",
         widget=forms.TextInput(attrs={"autocomplete": "off"}),
     )
 
@@ -25,7 +25,7 @@ class OTPForm(forms.Form):
         otp_token = self.cleaned_data["otp_token"]
         user = self.user
         if not user_has_device(user):
-            raise ValidationError("Le système n'a pas trouvé d'appareil (carte OTP ou générateur sur téléphone) pour votre compte. Contactez le support pour en ajouter un.")
+            raise ValidationError("Le système n'a pas trouvé d'appareil (carte Aidants Connect ou générateur sur téléphone) pour votre compte. Contactez le support pour en ajouter un.")
 
         for device in devices_for_user(user):
             if device.verify_is_allowed() and device.verify_token(otp_token):
