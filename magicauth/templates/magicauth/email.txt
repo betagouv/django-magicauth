@@ -1,9 +1,9 @@
 Bonjour {{ user.first_name }} {{ user.last_name }},
 
-Pour accéder à {{ site.domain }}, vous avez juste à cliquer sur ce lien de connexion:  https://{{ site.domain }}{% url 'magicauth-wait' token.key %}?next={{ next_url|urlencode }}
+Pour accéder à {{ site_domain }}, vous avez juste à cliquer sur ce lien de connexion:  https://{{ site_domain }}{% url 'magicauth-wait' token.key %}?next={{ next_url|urlencode }}
 
 Ce lien n'est valable que {{ TOKEN_DURATION_MINUTES }} minutes. Il est à usage unique.
 
 Bonne journée,
 
-L'équipe de {{ site.domain }}
+L'équipe de {{ site_domain }}

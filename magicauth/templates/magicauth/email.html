@@ -301,7 +301,7 @@
                     <tr>
                       <td>
                         <p>Bonjour {{ user.first_name }} {{ user.last_name }},</p>
-                        <p>Pour accéder à {{ site.domain }}, vous avez juste à cliquer sur ce bouton :</p>
+                        <p>Pour accéder à {{ site_domain }}, vous avez juste à cliquer sur ce bouton :</p>
                         <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                           <tbody>
                             <tr>
@@ -309,7 +309,7 @@
                                 <table border="0" cellpadding="0" cellspacing="0">
                                   <tbody>
                                     <tr>
-                                      <td align="center"> <a href="https://{{ site.domain }}{% url 'magicauth-wait' token.key %}?next={{ next_url|urlencode }}">Connexion</a> </td>
+                                      <td align="center"> <a href="https://{{ site_domain }}{% url 'magicauth-wait' token.key %}?next={{ next_url|urlencode }}">Connexion</a> </td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -326,11 +326,11 @@
                           </p>
                           <p class="mb-6 align-center">
                             <strong>
-                              https://{{ site.domain }}{% url 'magicauth-wait' token.key %}?next={{ next_url|urlencode }}
+                              https://{{ site_domain }}{% url 'magicauth-wait' token.key %}?next={{ next_url|urlencode }}
                             </strong>
                           </p>
                           <p>Bonne journée,</p>
-                          <p>L'équipe de {{ site.domain }}</p>
+                          <p>L'équipe de {{ site_domain }}</p>
                         </div>
                       </td>
                     </tr>
