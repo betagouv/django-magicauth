@@ -1,6 +1,7 @@
 import math
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.template import loader
@@ -37,11 +38,17 @@ class SendTokenMixin(object):
         html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
         text_template = magicauth_settings.EMAIL_TEXT_TEMPLATE
         from_email = magicauth_settings.FROM_EMAIL
+        try:
+            site_domain = get_current_site(self.request).domain
+        except Site.DoesNotExist:
+            site_domain = self.request.get_host()
         context = {
             "token": token,
             "user": user,
-            "site": get_current_site(self.request),
-            "TOKEN_DURATION_MINUTES": math.floor(magicauth_settings.TOKEN_DURATION_SECONDS / 60),
+            "site_domain": site_domain,
+            "TOKEN_DURATION_MINUTES": math.floor(
+                magicauth_settings.TOKEN_DURATION_SECONDS / 60
+            ),
             "TOKEN_DURATION_SECONDS": magicauth_settings.TOKEN_DURATION_SECONDS,
         }
         if extra_context:
