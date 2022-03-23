@@ -1,0 +1,10 @@
+====================
+Django MagicAuth 0.8
+====================
+
+
+* Fix a Django warning : Django does not need default app anymore
+* Remove deprecated ugettext_lazy in favor of gettext_lazy
+* Fix an issue with case sensitivity on email login
+* Add conditional import for OTPForm
+* Add list of projects using Magicauth in README
