@@ -65,6 +65,11 @@ WAIT_URL = getattr(django_settings, "MAGICAUTH_WAIT_URL", "chargement/code/<str:
 VALIDATE_TOKEN_URL = getattr(
     django_settings, "MAGICAUTH_VALIDATE_TOKEN_URL", "code/<str:key>/"
 )
+AUTHENTICATION_BACKEND = getattr(
+    django_settings,
+    "MAGICAUTH_AUTHENTICATION_BACKEND",
+    "django.contrib.auth.backends.ModelBackend",
+)
 
 # Logged in redirect view :
 # view on which the user lands once logged in. This is a view in your site, probably something
@@ -95,17 +100,12 @@ EMAIL_UNKNOWN_MESSAGE = getattr(
     django_settings, "MAGICAUTH_EMAIL_UNKNOWN_MESSAGE", "Aucun utilisateur trouvé."
 )
 # How long the user will wait on the WAIT_URL page before doing the actual login.
-WAIT_SECONDS = getattr(
-    django_settings, "MAGICAUTH_WAIT_SECONDS", 3
-)
+WAIT_SECONDS = getattr(django_settings, "MAGICAUTH_WAIT_SECONDS", 3)
 # This enables the 2FA OTP field
-ENABLE_2FA = getattr(
-    django_settings, "MAGICAUTH_ENABLE_2FA", False
-)
+ENABLE_2FA = getattr(django_settings, "MAGICAUTH_ENABLE_2FA", False)
 # Can be 6 or 8 (https://django-otp-official.readthedocs.io/en/stable/overview.html#django_otp.plugins.otp_totp.models.TOTPDevice.digits)
-OTP_NUM_DIGITS = getattr(
-    django_settings, "MAGICAUTH_OTP_NUM_DIGITS", 6
-)
-if OTP_NUM_DIGITS not in [6, 8] :
-    raise ValueError("OTP_NUM_DIGITS must be either 6 or 8 character long --> https://django-otp-official.readthedocs.io/en/stable/overview.html#django_otp.plugins.otp_totp.models.TOTPDevice.digits")
-
+OTP_NUM_DIGITS = getattr(django_settings, "MAGICAUTH_OTP_NUM_DIGITS", 6)
+if OTP_NUM_DIGITS not in [6, 8]:
+    raise ValueError(
+        "OTP_NUM_DIGITS must be either 6 or 8 character long --> https://django-otp-official.readthedocs.io/en/stable/overview.html#django_otp.plugins.otp_totp.models.TOTPDevice.digits"
+    )

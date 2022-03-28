@@ -1,16 +1,15 @@
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login
 from django.shortcuts import redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.generic import View, FormView, TemplateView
-from django.contrib.auth import get_user_model
+from django.views.generic import FormView, TemplateView, View
+
 from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
-
 from magicauth.models import MagicToken
 from magicauth.next_url import NextUrlMixin
 from magicauth.send_token import SendTokenMixin
@@ -86,6 +85,7 @@ class EmailSentView(NextUrlMixin, TemplateView):
     """
     Step 3 of login process : you get a confirmation page that the email was sent.
     """
+
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
@@ -99,12 +99,15 @@ class WaitView(NextUrlMixin, TemplateView):
     This is for solving an issue with a security feature in some email clients where
     the magic link is verified and and thus the token gets invalidated by the email client.
     """
+
     template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        validate_token_url = reverse('magicauth-validate-token', kwargs={'key': token_key})
+        validate_token_url = reverse(
+            "magicauth-validate-token", kwargs={"key": token_key}
+        )
         next_url_quoted = self.get_next_url_encoded(self.request)
         context["next_step_url"] = f"{validate_token_url}?next={next_url_quoted}"
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
@@ -153,7 +156,7 @@ class ValidateTokenView(NextUrlMixin, View):
             )
             return redirect("magicauth-login")
         url = self.get_next_url(request)
-        login(self.request, token.user)
+        login(self.request, token.user, magicauth_settings.AUTHENTICATION_BACKEND)
         MagicToken.objects.filter(
             user=token.user
         ).delete()  # Remove them all for this user
