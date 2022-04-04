@@ -11,7 +11,6 @@ INSTALLED_APPS = [
     "magicauth",
     "django_otp",
     "django_otp.plugins.otp_static",
-    "django.contrib.sites",
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -31,5 +30,3 @@ MIDDLEWARE = [
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "django_otp.middleware.OTPMiddleware",
 ]
-
-SITE_ID = 1
