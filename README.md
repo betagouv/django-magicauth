@@ -76,10 +76,6 @@ MIDDLEWARE = [
 ]
 ```
 
-7. Configure the projet's domain name using the `Site` model and, if needed, the corresponding `SITE_ID`.
-If you dont configure the domain name, it will default to the URL path.
-
-
 ## Two-Factor Authentication (2FA) using One Time Passwords (OTP)
 
 Two-Factor Authentication means you ask for two different passwords from your user : their normal password and an OTP. (See https://en.wikipedia.org/wiki/Multi-factor_authentication)
