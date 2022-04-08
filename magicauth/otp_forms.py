@@ -18,9 +18,8 @@ class OTPForm(forms.Form):
         min_length=OTP_NUM_DIGITS,
         validators=[RegexValidator(r"^\d{6}$")],
         label=_(
-            "Entrez le code à {OTP_NUM_DIGITS} chiffres généré par votre téléphone ou votre carte OTP"
-        )
-        % {"OTP_NUM_DIGITS": OTP_NUM_DIGITS},
+            "Entrez le code à %(OTP_NUM_DIGITS)s chiffres généré par votre téléphone ou votre carte OTP"
+        ) % {"OTP_NUM_DIGITS": OTP_NUM_DIGITS},
         widget=forms.TextInput(attrs={"autocomplete": "off"}),
     )
 
