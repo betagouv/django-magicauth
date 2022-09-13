@@ -33,7 +33,7 @@ class SendTokenMixin(object):
         return user
 
     def send_email(self, user, user_email, token, extra_context=None):
-        email_subject = magicauth_settings.EMAIL_SUBJECT
+        subject_template = magicauth_settings.EMAIL_SUBJECT_TEMPLATE
         html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
         text_template = magicauth_settings.EMAIL_TEXT_TEMPLATE
         from_email = magicauth_settings.FROM_EMAIL
@@ -48,6 +48,9 @@ class SendTokenMixin(object):
             context.update(extra_context)
         text_message = loader.render_to_string(text_template, context)
         html_message = loader.render_to_string(html_template, context)
+        email_subject = loader.render_to_string(subject_template, context)
+        email_subject = " ".join(email_subject.splitlines()).strip()
+
         send_mail(
             subject=email_subject,
             message=text_message,

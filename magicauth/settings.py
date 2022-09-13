@@ -15,7 +15,10 @@ from django.conf import settings as django_settings
 #################
 # Email settings
 #################
-EMAIL_SUBJECT = getattr(django_settings, "MAGICAUTH_EMAIL_SUBJECT", "Lien de connexion")
+EMAIL_SUBJECT_TEMPLATE = getattr(
+    django_settings, "MAGICAUTH_EMAIL_SUBJECT_TEMPLATE", "magicauth/email_subject.txt"
+)
+
 EMAIL_HTML_TEMPLATE = getattr(
     django_settings, "MAGICAUTH_EMAIL_HTML_TEMPLATE", "magicauth/email.html"
 )
