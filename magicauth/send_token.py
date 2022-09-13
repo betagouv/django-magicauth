@@ -8,6 +8,8 @@ from django.template import loader
 from magicauth import settings as magicauth_settings
 from magicauth.models import MagicToken
 
+from . import adapters
+
 
 class SendTokenMixin(object):
     """
@@ -33,15 +35,20 @@ class SendTokenMixin(object):
         return user
 
     def send_email(self, user, user_email, token, extra_context=None):
+        adapter = adapters.get_adapter()
+
         subject_template = magicauth_settings.EMAIL_SUBJECT_TEMPLATE
         html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
         text_template = magicauth_settings.EMAIL_TEXT_TEMPLATE
-        from_email = magicauth_settings.FROM_EMAIL
+        from_email = adapter.get_from_email()
+
         context = {
             "token": token,
             "user": user,
             "site": get_current_site(self.request),
-            "TOKEN_DURATION_MINUTES": math.floor(magicauth_settings.TOKEN_DURATION_SECONDS / 60),
+            "TOKEN_DURATION_MINUTES": math.floor(
+                magicauth_settings.TOKEN_DURATION_SECONDS / 60
+            ),
             "TOKEN_DURATION_SECONDS": magicauth_settings.TOKEN_DURATION_SECONDS,
         }
         if extra_context:

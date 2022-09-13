@@ -13,6 +13,13 @@ from django.conf import settings as django_settings
 # If it's not, add MAGICAUTH_LOGOUT_URL_NAME in your settings.
 
 #################
+# Adapter
+#################
+ADAPTER = getattr(
+    django_settings, "MAGICAUTH_ADAPTER", "magicauth.adapters.DefaultAccountAdapter"
+)
+
+#################
 # Email settings
 #################
 EMAIL_SUBJECT_TEMPLATE = getattr(
