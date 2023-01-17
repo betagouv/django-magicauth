@@ -14,6 +14,8 @@ from magicauth.models import MagicToken
 from magicauth.next_url import NextUrlMixin
 from magicauth.send_token import SendTokenMixin
 
+from . import adapters
+
 try:
     from magicauth.otp_forms import OTPForm
 except ImportError:
@@ -58,6 +60,13 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
 
     def form_valid(self, form, *args, **kwargs):
         user_email = form.cleaned_data["email"]
+
+        email_field = magicauth_settings.EMAIL_FIELD
+        field_lookup = {f"{email_field}__iexact": user_email}
+        if not get_user_model().objects.filter(**field_lookup).exists():
+            adapter = adapters.get_adapter()
+            adapter.email_unknown_callback(self.request, user_email, form)
+
         context = {"next_url": self.get_next_url(self.request)}
 
         def is_OTP_valid():

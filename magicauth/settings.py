@@ -99,12 +99,8 @@ LOGOUT_URL_NAME = getattr(django_settings, "MAGICAUTH_LOGOUT_URL_NAME", "logout"
 TOKEN_DURATION_SECONDS = getattr(
     django_settings, "MAGICAUTH_TOKEN_DURATION_SECONDS", 5 * 60
 )
-# Function to call when the email entered in the form is not found in the database.
-# The default just raises an error whose message gets displayed on the login page.
-EMAIL_UNKNOWN_CALLBACK = getattr(
-    django_settings, "MAGICAUTH_EMAIL_UNKNOWN_CALLBACK", "magicauth.utils.raise_error"
-)
-# If using the default EMAIL_UNKNOWN_CALLBACK,
+
+# If using the default email_unknown_callback() from the Adapter,
 # this message will be displayed when an unknown email is entered.
 EMAIL_UNKNOWN_MESSAGE = getattr(
     django_settings, "MAGICAUTH_EMAIL_UNKNOWN_MESSAGE", "Aucun utilisateur trouvé."
