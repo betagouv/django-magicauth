@@ -15,6 +15,7 @@ from magicauth.next_url import NextUrlMixin
 from magicauth.send_token import SendTokenMixin
 
 from . import adapters
+from . import signals
 
 try:
     from magicauth.otp_forms import OTPForm
@@ -169,4 +170,14 @@ class ValidateTokenView(NextUrlMixin, View):
         MagicToken.objects.filter(
             user=token.user
         ).delete()  # Remove them all for this user
-        return redirect(url)
+
+        response = redirect(url)
+
+        signals.user_logged_in.send(
+            sender=request.user.__class__,
+            request=request,
+            response=response,
+            user=request.user,
+        )
+
+        return response
