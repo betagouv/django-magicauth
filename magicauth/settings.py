@@ -76,6 +76,12 @@ LOGGED_IN_REDIRECT_URL_NAME = getattr(
 # Logout view : the url for logout in your site.
 LOGOUT_URL_NAME = getattr(django_settings, "MAGICAUTH_LOGOUT_URL_NAME", "logout")
 
+# The Django authentication backend that magicauth will default to.
+DEFAULT_AUTHENTICATION_BACKEND = getattr(
+    django_settings, "MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND", "django.contrib.auth.backends.ModelBackend2"
+)
+
+
 #################
 # Other settings
 #################
