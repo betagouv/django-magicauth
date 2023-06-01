@@ -153,7 +153,7 @@ class ValidateTokenView(NextUrlMixin, View):
             )
             return redirect("magicauth-login")
         url = self.get_next_url(request)
-        login(self.request, token.user)
+        login(self.request, token.user, backend="django.contrib.auth.backends.ModelBackend")
         MagicToken.objects.filter(
             user=token.user
         ).delete()  # Remove them all for this user
