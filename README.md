@@ -136,11 +136,30 @@ pip install -r requirements.txt
 tox
 ```
 
+### Release to Pypi
+
+To create a wheel, from the virtual environnement:
+
+```
+(venv) $ python -m pip install --upgrade pip setuptools wheel
+(venv) $ python setup.py sdist bdist_wheel
+
+# See dist/*.whl
+```
+
+Upload sdist and wheel:
+
+```
+(venv) $ pip install twine
+(venv) $ twine upload dist/*
+```
+
 # Projects using Magicauth
 https://github.com/betagouv/e-controle/
 https://github.com/betagouv/Aidants_Connect
 https://github.com/betagouv/peps
 https://github.com/betagouv/urbanvitaliz-django
+
 
 Join us !
 
