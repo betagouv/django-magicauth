@@ -162,7 +162,5 @@ class ValidateTokenView(NextUrlMixin, View):
                 "MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND should be a "
                 "dotted import path string."
             ) from e
-            MagicToken.objects.filter(
-                user=token.user
-            ).delete()  # Remove them all for this user
+        MagicToken.objects.filter(user=token.user).delete()  # Remove them all for this user
         return redirect(url)
