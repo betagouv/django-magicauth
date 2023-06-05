@@ -136,6 +136,32 @@ pip install -r requirements.txt
 tox
 ```
 
+### Release process
+
+The follwing dependencies need to be installed: `pip setuptools wheel twine`:
+
+```shell
+python -m pip install --upgrade pip setuptools wheel twine
+```
+
+1. Create a new MD file under `docs/releases` named after the new version and fill the file with the changes
+2. Change the version in `setup.py`
+3. Create a commit named *Release version <version>*
+4. Open and the PR for that release
+5. Create a new git tag:
+   ```shell
+   git tag <version>
+   git push --tags 
+   ```
+6. Create a new release at https://github.com/betagouv/django-magicauth/releases/new
+7. Publish the new version on PyPI:
+   ```shell
+    python setup.py sdist bdist_wheel
+    twine upload dist/*
+    ```
+ 
+
+
 # Projects using Magicauth
 https://github.com/betagouv/e-controle/
 https://github.com/betagouv/Aidants_Connect
