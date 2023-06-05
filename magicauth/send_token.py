@@ -10,6 +10,11 @@ from magicauth.models import MagicToken
 
 
 class SendTokenMixin(object):
+    email_subject = magicauth_settings.EMAIL_SUBJECT
+    html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
+    text_template = magicauth_settings.EMAIL_TEXT_TEMPLATE
+    from_email = magicauth_settings.FROM_EMAIL
+
     """
     Helper for sending an email containing a link containing the MagicToken.
     """
@@ -32,26 +37,36 @@ class SendTokenMixin(object):
         user = user_class.objects.get(**field_lookup)
         return user
 
-    def send_email(self, user, user_email, token, extra_context=None):
-        email_subject = magicauth_settings.EMAIL_SUBJECT
-        html_template = magicauth_settings.EMAIL_HTML_TEMPLATE
-        text_template = magicauth_settings.EMAIL_TEXT_TEMPLATE
-        from_email = magicauth_settings.FROM_EMAIL
+    def get_email_context(self, user, token, extra_context=None):
         context = {
             "token": token,
             "user": user,
             "site": get_current_site(self.request),
-            "TOKEN_DURATION_MINUTES": math.floor(magicauth_settings.TOKEN_DURATION_SECONDS / 60),
+            "TOKEN_DURATION_MINUTES": math.floor(
+                magicauth_settings.TOKEN_DURATION_SECONDS / 60
+            ),
             "TOKEN_DURATION_SECONDS": magicauth_settings.TOKEN_DURATION_SECONDS,
         }
         if extra_context:
             context.update(extra_context)
-        text_message = loader.render_to_string(text_template, context)
-        html_message = loader.render_to_string(html_template, context)
+
+        return context
+
+    def render_email(self, context):
+        text_message = loader.render_to_string(self.text_template, context)
+        html_message = loader.render_to_string(self.html_template, context)
+
+        return text_message, html_message
+
+    def send_email(self, user, user_email, token, extra_context=None):
+        text_message, html_message = self.render_email(
+            self.get_email_context(user, token, extra_context)
+        )
+
         send_mail(
-            subject=email_subject,
+            subject=self.email_subject,
             message=text_message,
-            from_email=from_email,
+            from_email=self.from_email,
             html_message=html_message,
             recipient_list=[user_email],
             fail_silently=False,
