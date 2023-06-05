@@ -153,16 +153,16 @@ class ValidateTokenView(NextUrlMixin, View):
             )
             return redirect("magicauth-login")
         url = self.get_next_url(request)
-    try:
-        login(self.request, token.user, backend=magicauth_settings.DEFAULT_AUTHENTICATION_BACKEND)
-    except ValueError as e:
-        raise ValueError(
-            "You have multiple authentication backends configured  and therefore must "
-            "set the MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND environement variable in "
-            "in your settings.py. MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND should be a "
-            "dotted import path string."
-        ) from e
-        MagicToken.objects.filter(
-            user=token.user
-        ).delete()  # Remove them all for this user
+        try:
+            login(self.request, token.user, backend=magicauth_settings.DEFAULT_AUTHENTICATION_BACKEND)
+        except ValueError as e:
+            raise ValueError(
+                "You have multiple authentication backends configured and therefore must "
+                "define the MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND setting. "
+                "MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND should be a "
+                "dotted import path string."
+            ) from e
+            MagicToken.objects.filter(
+                user=token.user
+            ).delete()  # Remove them all for this user
         return redirect(url)
