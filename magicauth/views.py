@@ -79,7 +79,7 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
             self.send_token(user_email=user_email, extra_context=context)
             return super().form_valid(form)
 
-        return super().form_invalid(form)
+        return self.form_invalid(form)
 
 
 class EmailSentView(NextUrlMixin, TemplateView):
