@@ -31,6 +31,7 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
     """
 
     form_class = EmailForm
+    otp_form_class = OTPForm
     success_url = reverse_lazy("magicauth-email-sent")
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
 
@@ -61,31 +62,39 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
         user_email = form.cleaned_data["email"]
         context = {"next_url": self.get_next_url(self.request)}
 
-        def is_OTP_valid():
-            if not magicauth_settings.ENABLE_2FA:
-                return True
+        user = self.get_user(user_email)
+        otp_form = self.get_otp_form(user)
 
-            email_field = "%s__iexact" % magicauth_settings.EMAIL_FIELD
-            user = get_user_model().objects.get(**{email_field: user_email})
+        if magicauth_settings.ENABLE_2FA and not otp_form.is_valid():
+            return self.otp_form_invalid(form, otp_form)
 
-            OTP_form = OTPForm(user=user, data=self.request.POST)
-            if OTP_form.is_valid():
-                return True
-            for error in OTP_form.errors["otp_token"]:
-                form.add_error("email", error)
-                return False
+        self.send_token(user_email=user_email, extra_context=context)
+        return super().form_valid(form)
 
-        if is_OTP_valid():
-            self.send_token(user_email=user_email, extra_context=context)
-            return super().form_valid(form)
+    def get_user(self, user_email):
+        email_field = "%s__iexact" % magicauth_settings.EMAIL_FIELD
+        return get_user_model().objects.get(**{email_field: user_email})
 
-        return super().form_invalid(form)
+    def otp_form_invalid(self, form, otp_form):
+        for error in otp_form.errors["otp_token"]:
+            form.add_error("email", error)
+        return self.form_invalid(form)
+
+    def get_otp_form_class(self):
+        return self.otp_form_class
+
+    def get_otp_form(self, user):
+        return self.get_otp_form_class()(**self.get_otp_form_kwargs(user))
+
+    def get_otp_form_kwargs(self, user=None):
+        return {"user": user, "data": self.request.POST}
 
 
 class EmailSentView(NextUrlMixin, TemplateView):
     """
     Step 3 of login process : you get a confirmation page that the email was sent.
     """
+
     template_name = magicauth_settings.EMAIL_SENT_VIEW_TEMPLATE
 
 
@@ -104,7 +113,7 @@ class WaitView(NextUrlMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        validate_token_url = reverse('magicauth-validate-token', kwargs={'key': token_key})
+        validate_token_url = reverse("magicauth-validate-token", kwargs={"key": token_key})
         next_url_quoted = self.get_next_url_encoded(self.request)
         context["next_step_url"] = f"{validate_token_url}?next={next_url_quoted}"
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
