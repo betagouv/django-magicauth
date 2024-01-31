@@ -49,7 +49,7 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
         context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
         context["OTP_enabled"] = magicauth_settings.ENABLE_2FA
         if magicauth_settings.ENABLE_2FA:
-            context["OTP_form"] = OTPForm(self.request.user)
+            context["OTP_form"] = self.get_otp_form(self.request.user)
         return context
 
     def get_success_url(self, **kwargs):
@@ -87,7 +87,20 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
         return self.get_otp_form_class()(**self.get_otp_form_kwargs(user))
 
     def get_otp_form_kwargs(self, user=None):
-        return {"user": user, "data": self.request.POST}
+        kwargs = {
+            "user": user,
+            "initial": self.get_initial(),
+            "prefix": self.get_prefix(),
+        }
+
+        if self.request.method in ("POST", "PUT"):
+            kwargs.update(
+                {
+                    "data": self.request.POST,
+                    "files": self.request.FILES,
+                }
+            )
+        return kwargs
 
 
 class EmailSentView(NextUrlMixin, TemplateView):
@@ -108,12 +121,15 @@ class WaitView(NextUrlMixin, TemplateView):
     This is for solving an issue with a security feature in some email clients where
     the magic link is verified and and thus the token gets invalidated by the email client.
     """
+
     template_name = magicauth_settings.WAIT_VIEW_TEMPLATE
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         token_key = kwargs.get("key")
-        validate_token_url = reverse("magicauth-validate-token", kwargs={"key": token_key})
+        validate_token_url = reverse(
+            "magicauth-validate-token", kwargs={"key": token_key}
+        )
         next_url_quoted = self.get_next_url_encoded(self.request)
         context["next_step_url"] = f"{validate_token_url}?next={next_url_quoted}"
         context["WAIT_SECONDS"] = magicauth_settings.WAIT_SECONDS
@@ -163,7 +179,11 @@ class ValidateTokenView(NextUrlMixin, View):
             return redirect("magicauth-login")
         url = self.get_next_url(request)
         try:
-            login(self.request, token.user, backend=magicauth_settings.DEFAULT_AUTHENTICATION_BACKEND)
+            login(
+                self.request,
+                token.user,
+                backend=magicauth_settings.DEFAULT_AUTHENTICATION_BACKEND,
+            )
         except ValueError as e:
             raise ValueError(
                 "You have multiple authentication backends configured and therefore must "
@@ -171,5 +191,7 @@ class ValidateTokenView(NextUrlMixin, View):
                 "MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND should be a "
                 "dotted import path string."
             ) from e
-        MagicToken.objects.filter(user=token.user).delete()  # Remove them all for this user
+        MagicToken.objects.filter(
+            user=token.user
+        ).delete()  # Remove them all for this user
         return redirect(url)
