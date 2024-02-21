@@ -1,7 +1,12 @@
+from datetime import timedelta
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.utils import timezone
 from django.utils.translation import gettext as _
+
+from magicauth.models import MagicToken
 
 try:
     from django_otp import user_has_device, devices_for_user
@@ -19,7 +24,8 @@ class OTPForm(forms.Form):
         validators=[RegexValidator(r"^\d{6}$")],
         label=_(
             "Entrez le code à %(OTP_NUM_DIGITS)s chiffres généré par votre téléphone ou votre carte OTP"
-        ) % {"OTP_NUM_DIGITS": OTP_NUM_DIGITS},
+        )
+        % {"OTP_NUM_DIGITS": OTP_NUM_DIGITS},
         widget=forms.TextInput(attrs={"autocomplete": "off"}),
     )
 
@@ -43,3 +49,23 @@ class OTPForm(forms.Form):
                 return otp_token
 
         raise ValidationError(_("Ce code n'est pas valide."))
+
+
+class TokenValidationForm(forms.Form):
+    token = forms.CharField()
+
+    def clean_token(self):
+        token = self.cleaned_data.get("token")
+        try:
+            token = MagicToken.objects.get(key=token)
+            if token.created < timezone.now() - timedelta(
+                seconds=magicauth_settings.TOKEN_DURATION_SECONDS
+            ):
+                # Do not raise here as we still want to cache the token in cleaned_data
+                # for further manipulations
+                self.add_error("token", ValidationError("", code="token_expired"))
+            return token
+        except MagicToken.DoesNotExist:
+            raise ValidationError("", code="token_does_not_exist")
+        except MagicToken.MultipleObjectsReturned:
+            raise ValidationError("", code="multiple_token_returned")

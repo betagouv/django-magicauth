@@ -3,9 +3,12 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth import login
+from django.forms.utils import ErrorList
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_GET
 from django.views.generic import View, FormView, TemplateView
 from django.contrib.auth import get_user_model
 from magicauth import settings as magicauth_settings
@@ -16,7 +19,7 @@ from magicauth.next_url import NextUrlMixin
 from magicauth.send_token import SendTokenMixin
 
 try:
-    from magicauth.otp_forms import OTPForm
+    from magicauth.otp_forms import OTPForm, TokenValidationForm
 except ImportError:
     pass  # OTP form class is optional
 
@@ -136,7 +139,9 @@ class WaitView(NextUrlMixin, TemplateView):
         return context
 
 
-class ValidateTokenView(NextUrlMixin, View):
+@method_decorator(require_GET, name="dispatch")
+class ValidateTokenView(NextUrlMixin, FormView):
+    form_class = TokenValidationForm
     """
     Step 5 of login process : you visit the ValidateTokenView that validates the token, logs you in,
     and redirects you to the url in the "next" param (or the default view if no next).
@@ -148,36 +153,43 @@ class ValidateTokenView(NextUrlMixin, View):
     start over.
     """
 
-    @staticmethod
-    def get_valid_token(key):
-        duration = magicauth_settings.TOKEN_DURATION_SECONDS
-        try:
-            token = MagicToken.objects.get(key=key)
-        except MagicToken.DoesNotExist:
-            return None
-        except MagicToken.MultipleObjectsReturned:
-            return None
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
 
-        if token.created < timezone.now() - timedelta(seconds=duration):
-            token.delete()
-            return None
-        return token
+    def get_form_kwargs(self):
+        return {**super().get_form_kwargs(), "data": {"token": self.kwargs.get("key")}}
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            url = self.get_next_url(request)
-            return redirect(url)
-        token_key = kwargs.get("key")
-        token = self.get_valid_token(token_key)
-        if not token:
-            messages.warning(
-                self.request,
-                "Ce lien de connexion ne fonctionne plus. "
-                "Pour en recevoir un nouveau, nous vous invitons à renseigner "
-                "votre email ci-dessous puis à cliquer sur valider.",
-            )
-            return redirect("magicauth-login")
-        url = self.get_next_url(request)
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        token = form.cleaned_data.get("token")
+        error_codes = [err.code for err in form.errors.get("token", ErrorList()).data]
+        if "token_expired" in error_codes:
+            token.delete()
+
+        return self.token_invalid()
+
+    def token_invalid(self):
+        messages.warning(
+            self.request,
+            "Ce lien de connexion ne fonctionne plus. "
+            "Pour en recevoir un nouveau, nous vous invitons à renseigner "
+            "votre email ci-dessous puis à cliquer sur valider.",
+        )
+        return redirect(reverse("magicauth-login"))
+
+    def form_valid(self, form):
+        # Early compute success URL for validation before login
+        success_url = self.get_success_url()
+
+        token = form.cleaned_data["token"]
         try:
             login(
                 self.request,
@@ -186,12 +198,14 @@ class ValidateTokenView(NextUrlMixin, View):
             )
         except ValueError as e:
             raise ValueError(
-                "You have multiple authentication backends configured and therefore must "
-                "define the MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND setting. "
+                "You have multiple authentication backends configured and therefore "
+                "must define the MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND setting. "
                 "MAGICAUTH_DEFAULT_AUTHENTICATION_BACKEND should be a "
                 "dotted import path string."
             ) from e
-        MagicToken.objects.filter(
-            user=token.user
-        ).delete()  # Remove them all for this user
-        return redirect(url)
+        # Remove them all for this user
+        MagicToken.objects.filter(user=token.user).delete()
+        return redirect(success_url)
+
+    def get_success_url(self):
+        return self.get_next_url(self.request)
