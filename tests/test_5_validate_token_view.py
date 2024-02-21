@@ -36,6 +36,12 @@ def test_opening_magic_link_with_valid_token_redirects(client):
     assert response.url == "/landing/"
 
 
+def test_post_trigger_http_405(client):
+    token = factories.MagicTokenFactory()
+    response = client.post(reverse("magicauth-validate-token", args=[token.key]))
+    assert response.status_code == 405
+
+
 def test_opening_magic_link_with_a_next_sets_a_new_url(client):
     token = factories.MagicTokenFactory()
     next_url_raw = "/test_dashboard/?a=test&b=test"
