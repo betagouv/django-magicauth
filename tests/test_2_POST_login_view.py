@@ -7,9 +7,9 @@ from magicauth import settings
 from magicauth.models import MagicToken
 from tests import factories
 
-'''
+"""
 Step 2 of login process : see doc in magicauth/views.py for step details
-'''
+"""
 
 pytestmark = mark.django_db
 
@@ -86,11 +86,13 @@ def test_posting_unknown_email_does_not_send_email(client):
     post_email(client, "unknown@email.com")
     assert len(mail.outbox) == 0
 
+
 # Tests with OTPs
 def post_email_and_OTP(client, email, OTP):
     url = reverse("magicauth-login")
     data = {"email": email, "otp_token": OTP}
     return client.post(url, data=data)
+
 
 def test_posting_good_email_and_good_totp_success(client):
     settings.ENABLE_2FA = True
@@ -115,7 +117,11 @@ def test_posting_good_email_and_wrong_otp_error(client):
     response = post_email_and_OTP(client, thierry.email, "567654")
 
     assert response.status_code == 200
-    assert "Ce code n&#x27;est pas valide." in str(response.content)
+    assert len(response.context_data["OTP_form"].errors) == 1
+    assert (
+        response.context_data["OTP_form"].errors["otp_token"][0]
+        == "Ce code n'est pas valide."
+    )
     assert len(mail.outbox) == 0
 
 
@@ -132,6 +138,22 @@ def test_posting_wrong_email_and_wrong_otp_error(client):
     assert "invalid" in str(response.content)
     assert len(mail.outbox) == 0
 
+
+def test_posting_good_email_and_has_not_otp_error(client):
+    settings.ENABLE_2FA = True
+    user = factories.UserFactory()
+
+    response = post_email_and_OTP(client, user.email, "567654")
+
+    assert response.status_code == 200
+    assert len(response.context_data["OTP_form"].errors) == 1
+    assert response.context_data["OTP_form"].errors["otp_token"][0] == (
+        "Le système n'a pas trouvé d'appareil (carte OTP ou générateur sur téléphone) "
+        "pour votre compte. Contactez le support pour en ajouter un."
+    )
+    assert len(mail.outbox) == 0
+
+
 def test_thierry_has_several_devices_first_device(client):
     settings.ENABLE_2FA = True
     token = factories.MagicTokenFactory()
@@ -145,6 +167,7 @@ def test_thierry_has_several_devices_first_device(client):
 
     assert response.status_code == 302
     assert len(mail.outbox) == 1
+
 
 def test_thierry_has_several_devices_second_device(client):
     settings.ENABLE_2FA = True

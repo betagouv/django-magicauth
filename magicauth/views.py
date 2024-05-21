@@ -45,15 +45,14 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
         return super(LoginView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(LoginView, self).get_context_data(**kwargs)
-        context[
-            "LOGGED_IN_REDIRECT_URL_NAME"
-        ] = magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME
-        context["LOGOUT_URL_NAME"] = magicauth_settings.LOGOUT_URL_NAME
-        context["OTP_enabled"] = magicauth_settings.ENABLE_2FA
-        if magicauth_settings.ENABLE_2FA:
-            context["OTP_form"] = self.get_otp_form(self.request.user)
-        return context
+        if magicauth_settings.ENABLE_2FA and "OTP_form" not in kwargs:
+            kwargs["OTP_form"] = self.get_otp_form()
+        return super(LoginView, self).get_context_data(
+            **kwargs,
+            LOGGED_IN_REDIRECT_URL_NAME=magicauth_settings.LOGGED_IN_REDIRECT_URL_NAME,
+            LOGOUT_URL_NAME=magicauth_settings.LOGOUT_URL_NAME,
+            OTP_enabled=magicauth_settings.ENABLE_2FA,
+        )
 
     def get_success_url(self, **kwargs):
         url = reverse_lazy("magicauth-email-sent")
@@ -81,17 +80,20 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
     def otp_form_invalid(self, form, otp_form):
         for error in otp_form.errors["otp_token"]:
             form.add_error("email", error)
-        return self.form_invalid(form)
+
+        return self.render_to_response(
+            self.get_context_data(form=form, OTP_form=otp_form)
+        )
 
     def get_otp_form_class(self):
         return self.otp_form_class
 
-    def get_otp_form(self, user):
+    def get_otp_form(self, user=None):
         return self.get_otp_form_class()(**self.get_otp_form_kwargs(user))
 
     def get_otp_form_kwargs(self, user=None):
         kwargs = {
-            "user": user,
+            "user": user or self.request.user,
             "initial": self.get_initial(),
             "prefix": self.get_prefix(),
         }
