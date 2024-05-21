@@ -7,12 +7,6 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from magicauth.models import MagicToken
-
-try:
-    from django_otp import user_has_device, devices_for_user
-except ImportError:
-    pass
-
 from magicauth import settings as magicauth_settings
 
 
@@ -34,6 +28,8 @@ class OTPForm(forms.Form):
         self.user = user
 
     def clean_otp_token(self):
+        from django_otp import user_has_device, devices_for_user
+
         otp_token = self.cleaned_data["otp_token"]
         user = self.user
         if not user_has_device(user):

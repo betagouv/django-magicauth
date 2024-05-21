@@ -1,8 +1,9 @@
+-r requirements.txt
+
 pytest
 pytest-django
-django<4
 factory_boy>=3.0.0
 pytest-factoryboy
 flake8
 ipdb
-django-otp
+tox

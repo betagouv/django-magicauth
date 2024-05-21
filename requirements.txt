@@ -1,7 +1,2 @@
 django<5
-pytest
-pytest-django
-
-flake8
-tox
-
+django-otp
