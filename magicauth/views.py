@@ -1,3 +1,4 @@
+import warnings
 from datetime import timedelta
 import logging
 
@@ -37,6 +38,7 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
     otp_form_class = OTPForm
     success_url = reverse_lazy("magicauth-email-sent")
     template_name = magicauth_settings.LOGIN_VIEW_TEMPLATE
+    use_deprecated_login_for_errors = True
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -78,8 +80,18 @@ class LoginView(NextUrlMixin, SendTokenMixin, FormView):
         return get_user_model().objects.get(**{email_field: user_email})
 
     def otp_form_invalid(self, form, otp_form):
-        for error in otp_form.errors["otp_token"]:
-            form.add_error("email", error)
+        if self.use_deprecated_login_for_errors:
+            # This should be done on the client side if needed
+            msg = (
+                "Adding otp_form_class.otp_token to form_class.email will be "
+                "deprecated in the future. This can be deactivated right now by "
+                "setting LoginView.use_deprecated_login_for_errors to False."
+            )
+            warnings.warn(msg, DeprecationWarning)
+            logging.getLogger(__file__).warning(f"DEPRECATION: {msg}")
+
+            for error in otp_form.errors["otp_token"]:
+                form.add_error("email", error)
 
         return self.render_to_response(
             self.get_context_data(form=form, OTP_form=otp_form)
