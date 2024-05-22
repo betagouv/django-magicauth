@@ -1,16 +1,18 @@
-from datetime import timedelta
-from pytest import mark
 import urllib.parse
+from datetime import timedelta
 
 from django.shortcuts import reverse
 from django.utils import timezone
-from magicauth.models import MagicToken
+
+from pytest import mark
+
 from magicauth import settings
+from magicauth.models import MagicToken
 from tests import factories
 
-'''
+"""
 Step 5 of login process : see doc in magicauth/views.py for step details
-'''
+"""
 
 pytestmark = mark.django_db
 
@@ -19,7 +21,7 @@ def open_magic_link(client, token, next=None):
     url = reverse("magicauth-validate-token", args=[token.key])
     if next:
         # Encode the url (with urllib.parse.quote) otherwise URL params get lost.
-        url += '?next=' + urllib.parse.quote(next)
+        url += "?next=" + urllib.parse.quote(next)
     return client.get(url)
 
 
@@ -52,14 +54,14 @@ def test_opening_magic_link_with_a_next_sets_a_new_url(client):
 
 def test_validate_token_view_with_unsafe_next_does_not_log_in(client):
     token = factories.MagicTokenFactory()
-    next_url = 'http://www.myfishingsite.com/'
+    next_url = "http://www.myfishingsite.com/"
     open_magic_link(client, token, next_url)
     assert "_auth_user_id" not in client.session
 
 
 def test_validate_token_view_with_unsafe_next_raises_404(client):
     token = factories.MagicTokenFactory()
-    next_url = 'http://www.myfishingsite.com/'
+    next_url = "http://www.myfishingsite.com/"
     response = open_magic_link(client, token, next_url)
     assert response.status_code == 404
 
@@ -68,7 +70,7 @@ def test_validate_token_view_with_unsafe_next_raises_404_for_loggedin_user(clien
     token = factories.MagicTokenFactory()
     user = factories.UserFactory()
     client.force_login(user)
-    next_url = 'http://www.myfishingsite.com/'
+    next_url = "http://www.myfishingsite.com/"
     response = open_magic_link(client, token, next_url)
     assert response.status_code == 404
     assert user.is_authenticated
@@ -99,12 +101,14 @@ def test_unknown_token_redirects_to_login(client):
     url = reverse("magicauth-validate-token", args=["unknown-token"])
     response = client.get(url)
     assert response.status_code == 302
-    assert response.url == '/login/'
+    assert response.url == "/login/"
 
 
 def create_expired_token():
     token = factories.MagicTokenFactory()
-    token.created = timezone.now() - timedelta(seconds=(settings.TOKEN_DURATION_SECONDS * 2))
+    token.created = timezone.now() - timedelta(
+        seconds=(settings.TOKEN_DURATION_SECONDS * 2)
+    )
     token.save()
     return token
 
@@ -119,7 +123,7 @@ def test_expired_token_redirects_to_login(client):
     token = create_expired_token()
     response = open_magic_link(client, token)
     assert response.status_code == 302
-    assert response.url == '/login/'
+    assert response.url == "/login/"
 
 
 def test_expired_token_is_deleted_when_visited(client):

@@ -1,0 +1,73 @@
+[project]
+name = "django-magicauth"
+version = "1.0.2"
+description = "Password-less authentication: login by clicking on a magic link received by email."
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    'License :: OSI Approved :: MIT License',
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+license = {file = "LICENSE"}
+readme = {file = "README.md", "content-type" = "text/markdown"}
+
+[project.urls]
+"Homepage" = "https://github.com/betagouv/django-magicauth"
+"Source" = "https://github.com/betagouv/django-magicauth"
+"Bug tracker" = "https://github.com/betagouv/django-magicauth/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.black]
+force-exclude = '''
+/(
+    \.direnv
+    | \.eggs
+    | \.git
+    | \.hg
+    | \.mypy_cache
+    | \.nox
+    | \.tox
+    | \.venv
+    | venv
+    | \.svn
+    | _build
+    | buck-out
+    | build
+    | dist
+    | (.+/migrations)
+)/
+'''
+
+[tool.isort]
+profile = "black"
+src_paths = "."
+known_django = "django"
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+skip_glob = [
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".tox",
+    ".venv",
+    "venv",
+    ".svn",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "**/migrations",
+]

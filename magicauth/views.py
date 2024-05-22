@@ -1,20 +1,17 @@
-import warnings
-from datetime import timedelta
 import logging
+import warnings
 
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login
 from django.forms.utils import ErrorList
 from django.shortcuts import redirect
-from django.urls import reverse_lazy, reverse
-from django.utils import timezone
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_GET
-from django.views.generic import View, FormView, TemplateView
-from django.contrib.auth import get_user_model
+from django.views.generic import FormView, TemplateView
+
 from magicauth import settings as magicauth_settings
 from magicauth.forms import EmailForm
-
 from magicauth.models import MagicToken
 from magicauth.next_url import NextUrlMixin
 from magicauth.send_token import SendTokenMixin

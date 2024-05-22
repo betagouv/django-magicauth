@@ -4,7 +4,6 @@ from django.utils.module_loading import import_string
 
 from magicauth import settings as magicauth_settings
 
-
 email_unknown_callback = import_string(magicauth_settings.EMAIL_UNKNOWN_CALLBACK)
 
 
