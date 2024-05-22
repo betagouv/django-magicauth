@@ -4,6 +4,6 @@ pytest
 pytest-django
 factory_boy>=3.0.0
 pytest-factoryboy
-flake8
 ipdb
 tox
+pre-commit

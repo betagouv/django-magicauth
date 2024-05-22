@@ -1,8 +1,9 @@
-from pytest import mark
-
 from django.core import mail
 from django.shortcuts import reverse
+
 from faker import Factory as FakerFactory
+from pytest import mark
+
 from magicauth import settings
 from magicauth.models import MagicToken
 from tests import factories

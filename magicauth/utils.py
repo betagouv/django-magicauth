@@ -1,7 +1,6 @@
 import binascii
 import os
 
-
 from django import forms
 
 from . import settings as magicauth_settings

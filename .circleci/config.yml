@@ -28,6 +28,12 @@ jobs:
           key: v3-dependencies-{{ checksum "dev-requirements.txt" }}
 
       - run:
+          name: run code checks
+          command: |
+            source /tmp/venv/bin/activate
+            pre-commit run --all-files
+
+      - run:
           name: run unit tests
           command: |
             source /tmp/venv/bin/activate

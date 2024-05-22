@@ -1,7 +1,7 @@
 from django.urls import path
 
-from . import views as magicauth_views
 from . import settings as magicauth_settings
+from . import views as magicauth_views
 
 urlpatterns = [
     path(

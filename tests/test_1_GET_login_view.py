@@ -1,12 +1,13 @@
+from django.shortcuts import reverse
+
 from pytest import mark
 
-from django.shortcuts import reverse
 from magicauth import settings
 from tests import factories
 
-'''
+"""
 Step 1 of login process : see doc in magicauth/views.py for step details
-'''
+"""
 
 pytestmark = mark.django_db
 
@@ -49,11 +50,13 @@ def test_login_page_raises_404_if_unsafe_next_url_with_authenticated_user(client
     assert user.is_authenticated
     assert response.status_code == 404
 
+
 def test_template_displays_totp_field_when_2FA_enabled(client):
     settings.ENABLE_2FA = True
     response = client.get(reverse("magicauth-login"))
     assert response.status_code == 200
     assert "Entrez le code à 6" in response.rendered_content
+
 
 def test_template_does_not_displays_totp_field_when_2FA_disabled(client):
     settings.ENABLE_2FA = False

@@ -6,8 +6,8 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from magicauth.models import MagicToken
 from magicauth import settings as magicauth_settings
+from magicauth.models import MagicToken
 
 
 class OTPForm(forms.Form):
@@ -17,7 +17,8 @@ class OTPForm(forms.Form):
         min_length=OTP_NUM_DIGITS,
         validators=[RegexValidator(r"^\d{6}$")],
         label=_(
-            "Entrez le code à %(OTP_NUM_DIGITS)s chiffres généré par votre téléphone ou votre carte OTP"
+            "Entrez le code à %(OTP_NUM_DIGITS)s chiffres généré p"
+            "ar votre téléphone ou votre carte OTP"
         )
         % {"OTP_NUM_DIGITS": OTP_NUM_DIGITS},
         widget=forms.TextInput(attrs={"autocomplete": "off"}),
@@ -28,14 +29,15 @@ class OTPForm(forms.Form):
         self.user = user
 
     def clean_otp_token(self):
-        from django_otp import user_has_device, devices_for_user
+        from django_otp import devices_for_user, user_has_device
 
         otp_token = self.cleaned_data["otp_token"]
         user = self.user
         if not user_has_device(user):
             raise ValidationError(
                 _(
-                    "Le système n'a pas trouvé d'appareil (carte OTP ou générateur sur téléphone) pour votre compte. "
+                    "Le système n'a pas trouvé d'appareil "
+                    "(carte OTP ou générateur sur téléphone) pour votre compte. "
                     "Contactez le support pour en ajouter un."
                 )
             )
