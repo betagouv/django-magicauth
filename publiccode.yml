@@ -1,20 +1,41 @@
-publiccodeYmlVersion: "0.2"
+publiccodeYmlVersion: "0"
 name: Django Magicauth
 url: https://github.com/betagouv/django-magicauth
-creationDate: 2019-09-05
 logo: https://github.com/betagouv.png
 developmentStatus: stable
+softwareVersion: "1.0.2"
+platforms:
+  - web
 usedBy:
   - Aidants Connect
 softwareType: library
 description:
   en:
-    shortDescription: Password-less authentication for Django. An email with a magic link allows a secure login
-    documentation: https://github.com/betagouv/django-magicauth/blob/master/README.md
+    shortDescription: "Password-less authentication for Django. An email with a magic link allows a secure login."
+    longDescription: >
+      Django Magicauth brings password-less authentication to Django projects.
+      Users enter their email address and receive an email containing a
+      one-time link. Clicking the link logs them in without any password.
+      The library supports optional Two-Factor Authentication (2FA) using
+      One Time Passwords (OTP) via django-otp. It is designed to be easy to
+      integrate into any Django project and ships with default templates that
+      can be customised.
+    features:
+      - Password-less login via magic link sent by email
+      - Optional Two-Factor Authentication (OTP) support
+      - Customisable email templates
 legal:
-  license: mit
+  license: MIT
 maintenance:
-  type: community
+  type: "community"
+  contacts:
+    - name: estellecomment
+      affiliation: betagouv
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
+    - fr
 fundedBy:
   - name: Agence nationale de la cohésion des territoires
-    url: https://lannuaire.service-public.fr/gouvernement/da837b24-afa7-46ab-b56a-427dd4bcc159
+    uri: https://lannuaire.service-public.fr/gouvernement/da837b24-afa7-46ab-b56a-427dd4bcc159
